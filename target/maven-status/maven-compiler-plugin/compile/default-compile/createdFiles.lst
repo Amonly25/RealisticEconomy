@@ -1,0 +1,5 @@
+com\ar\askgaming\realisticeconomy\Commands.class
+com\ar\askgaming\realisticeconomy\datas\SQLiteDatabase.class
+com\ar\askgaming\realisticeconomy\EconomyService.class
+com\ar\askgaming\realisticeconomy\listeners\PlayerJoinListener.class
+com\ar\askgaming\realisticeconomy\Main.class
