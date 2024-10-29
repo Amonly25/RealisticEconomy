@@ -1,7 +1,5 @@
 package com.ar.askgaming.realisticeconomy.listeners;
 
-import java.sql.SQLException;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,9 +22,13 @@ public class PlayerJoinListener implements Listener{
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (!economyService.hasAccount(player.getName())) {
+        if (!economyService.hasAccount(player)) {
             plugin.getLogger().info(event.getPlayer() + " no tiene cuenta.");
-            economyService.createPlayerAccount(player.getName());
+            if (economyService.createPlayerAccount(player.getName())){
+                plugin.getLogger().info(event.getPlayer() + " cuenta creada.");
+            } else {
+                plugin.getLogger().info(event.getPlayer() + " cuenta no creada.");
+            }
         } else {
             plugin.getLogger().info(event.getPlayer() + " si tiene cuenta.");
         }

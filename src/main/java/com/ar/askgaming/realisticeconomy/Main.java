@@ -11,6 +11,8 @@ import net.milkbowl.vault.economy.Economy;
 public class Main extends JavaPlugin{
 
     private EconomyService economyService;
+    private ServerBank serverBank;
+
     private SQLiteDatabase sqlDatabase;
 
     public void onEnable(){
@@ -20,13 +22,15 @@ public class Main extends JavaPlugin{
         sqlDatabase = new SQLiteDatabase(this, getDataFolder() + "/economy.db");
 
         economyService = new EconomyService(this);
+        serverBank = new ServerBank(this);
+        
         getServer().getServicesManager().register(EconomyService.class, economyService, this, ServicePriority.Highest);
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
         getServer().getPluginCommand("eco").setExecutor(new Commands(this));
 
-        if (setupEconomy()) {
+        if (setupVault()) {
             getLogger().info("EconomyPlugin habilitado y registrado con Vault.");
         } else {
             getLogger().severe("No se encontró Vault. Deshabilitando EconomyPlugin.");
@@ -42,10 +46,14 @@ public class Main extends JavaPlugin{
     public EconomyService getEconomyService() {
         return economyService;
     }
+    public ServerBank getServerBank() {
+        return serverBank;
+    }
     public SQLiteDatabase getSqlDatabase() {
         return sqlDatabase;
     }
-        private boolean setupEconomy() {
+
+    private boolean setupVault() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
