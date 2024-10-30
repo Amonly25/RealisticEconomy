@@ -10,11 +10,9 @@ import com.ar.askgaming.realisticeconomy.Main;
 public class SQLiteDatabase {
 
     private final String url;
-    private final Main plugin;
 
     public SQLiteDatabase(Main main, String dbFile) {
         url = "jdbc:sqlite:" + dbFile;
-        plugin = main;
 
         createTable();
         createServerBankTable();
@@ -52,17 +50,14 @@ public class SQLiteDatabase {
     
             // Crear la tabla
             createStmt.execute();
-            System.out.println("Tabla 'serverbank' creada o ya existe.");
     
             // Insertar un registro inicial solo si la tabla fue creada
             String insertSql = "INSERT OR IGNORE INTO serverbank (balance) VALUES (1000.0)";
             try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                 insertStmt.executeUpdate();
-                System.out.println("Registro inicial insertado en 'serverbank'.");
             }
     
         } catch (SQLException e) {
-            System.err.println("Error al crear la tabla 'serverbank' o insertar el registro inicial.");
             e.printStackTrace();
         }
     }

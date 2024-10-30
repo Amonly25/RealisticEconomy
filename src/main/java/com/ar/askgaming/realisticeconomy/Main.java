@@ -3,6 +3,7 @@ package com.ar.askgaming.realisticeconomy;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.ar.askgaming.realisticeconomy.datas.LangHandler;
 import com.ar.askgaming.realisticeconomy.datas.SQLiteDatabase;
 import com.ar.askgaming.realisticeconomy.listeners.PlayerJoinListener;
 
@@ -15,14 +16,18 @@ public class Main extends JavaPlugin{
 
     private SQLiteDatabase sqlDatabase;
 
+    private LangHandler langHandler;
+
     public void onEnable(){
         
         saveDefaultConfig();
 
         sqlDatabase = new SQLiteDatabase(this, getDataFolder() + "/economy.db");
+        langHandler = new LangHandler(this);
 
         economyService = new EconomyService(this);
         serverBank = new ServerBank(this);
+
         
         getServer().getServicesManager().register(EconomyService.class, economyService, this, ServicePriority.Highest);
 
@@ -31,16 +36,16 @@ public class Main extends JavaPlugin{
         getServer().getPluginCommand("eco").setExecutor(new Commands(this));
 
         if (setupVault()) {
-            getLogger().info("EconomyPlugin habilitado y registrado con Vault.");
+            getLogger().info("EconomyPlugin found and hooked into Vault.");
         } else {
-            getLogger().severe("No se encontró Vault. Deshabilitando EconomyPlugin.");
+            getLogger().severe("Vault not found! Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
         }
 
     }
 
     public void onDisable() {
-        getLogger().info("EconomyPlugin deshabilitado.");
+        //sqlDatabase.close();
     }
 
     public EconomyService getEconomyService() {
@@ -51,6 +56,9 @@ public class Main extends JavaPlugin{
     }
     public SQLiteDatabase getSqlDatabase() {
         return sqlDatabase;
+    }
+    public LangHandler getLang() {
+        return langHandler;
     }
 
     private boolean setupVault() {

@@ -1,0 +1,3 @@
+balance: "Your balance is %balance%: "
+balance_other: "Player %player% has %balance%: "
+server_balance: "Server balance is %balance%: "

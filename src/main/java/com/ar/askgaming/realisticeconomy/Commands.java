@@ -28,9 +28,15 @@ public class Commands implements TabExecutor{
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // TODO Auto-generated method stub
+        String lang = "en";
+        if (sender instanceof Player){
+            Player p = (Player) sender;
+            lang = p.getLocale();
+        }
+
         switch (args[0].toLowerCase()) {
             case "balance":
-                handleBalanceCommand(sender, args);
+                handleBalanceCommand(sender, args,lang);
                 break;
             case "setup":
                 handleSetupCommand(sender, args);
@@ -68,81 +74,69 @@ public class Commands implements TabExecutor{
                 if (sender instanceof ConsoleCommandSender){
                     // revisar si ya ha sido configurado
                     plugin.getServerBank().setup(d);
-                    sender.sendMessage("ServerBank configurado.");
+
                 } else {
-                    sender.sendMessage("Este comando solo puede ser ejecutado por la consola.");
+                    sender.sendMessage("This command can only be executed by the console.");
                 }
             } catch (Exception e) {
-                sender.sendMessage("No es un número válido.");
+                sender.sendMessage("Invalid Number");
             }
         } else {
-            sender.sendMessage("Faltan argumentos, uso: /eco setup <cantidad>");
+            sender.sendMessage("Error, use: /eco setup <quantity>");
         }
     }
 
-    public void handleBalanceCommand(CommandSender sender, String[] args){
+    public void handleBalanceCommand(CommandSender sender, String[] args,String lang){
         if (args.length == 1){
             if (sender instanceof Player){
                 Player p = (Player) sender;
-                p.sendMessage("Tu balance es: " + plugin.getEconomyService().getBalance(p));
+                p.sendMessage(plugin.getLang().getFrom("balance", lang).replace("%balance%", String.valueOf(plugin.getEconomyService().getBalance(p))));
             } else {
-                sender.sendMessage("El balance del banco es: "+ plugin.getServerBank().getBalance());
+                sender.sendMessage(plugin.getLang().getFrom("server_balance", lang).replace("%balance%", String.valueOf(plugin.getServerBank().getBalance())));
             }
         } else if (args.length == 2){
             double balance = plugin.getEconomyService().getBalance(args[1]);
-            sender.sendMessage("El balance de " + args[1] + " es: " + balance);
-
+            sender.sendMessage(plugin.getLang().getFrom("balance_other", lang).replace("%balance%", String.valueOf(balance)).replace("%player%", args[1]));
         }
     }
+   
     public void handleAddCommand(CommandSender sender, String[] args){
         if (args.length == 3){
             try {
                 double d = Double.valueOf(args[2]);
                 EconomyResponse bank = plugin.getServerBank().withdraw(d);
-                if (!bank.transactionSuccess()){
-                    sender.sendMessage("No hay suficiente dinero en el banco del servidor.");
-                    return;
+                sender.sendMessage(bank.errorMessage);
+
+                if (bank.transactionSuccess()){
+                    EconomyResponse e = plugin.getEconomyService().depositPlayer(args[1], d);
+                    sender.sendMessage(e.errorMessage);
                 }
-                EconomyResponse e = plugin.getEconomyService().depositPlayer(args[1], d);
-                plugin.getLogger().info(e.errorMessage);
     
-                if (e.type == EconomyResponse.ResponseType.SUCCESS){
-                    sender.sendMessage("Has añadido "+ e.amount + " al balance de " + args[1]);
-                    sender.sendMessage(bank.errorMessage);
-                } else {
-                    sender.sendMessage("Error al añadir dinero al balance de " + args[1]);
-                }  
             } catch (Exception e) {
-                sender.sendMessage("No es un número válido.");
+                sender.sendMessage("Error: Invalid Number");
             } 
         } else {
-            sender.sendMessage("Faltan argumentos, uso: /eco add <jugador> <cantidad>");
+            sender.sendMessage("Error, use: /eco add <player> <amount>");
         }
     }
     public void handleTakeCommand(CommandSender sender, String[] args){
         if (args.length == 3){
             try {
                 EconomyResponse e = plugin.getEconomyService().withdrawPlayer(args[1], Double.valueOf(args[2]));
-                plugin.getLogger().info(e.errorMessage);
-                if (e.type == EconomyResponse.ResponseType.SUCCESS){
+                sender.sendMessage(e.errorMessage);
+                if (e.transactionSuccess()){
                     EconomyResponse bank = plugin.getServerBank().deposit(e.amount);
-                    sender.sendMessage("Has quitado "+e.amount+" al balance de " + args[1]);
                     sender.sendMessage(bank.errorMessage);
-                    if (!bank.transactionSuccess()){
-                        sender.sendMessage("Error al depositar el dinero en el banco del servidor.");
-                    }
-                } else {
-                    sender.sendMessage("Error al quitar dinero al balance de " + args[1]);
-                }
+                } 
             } catch (Exception e) {
-                sender.sendMessage("No es un número válido.");
+                sender.sendMessage("Error: Invalid Number.");
             }
         } else {
-            sender.sendMessage("Faltan argumentos, uso: /eco take <jugador> <cantidad>");
+            sender.sendMessage("Error: use: /eco take <player> <amount>");
         }
     }
     public void handleServerCommand(CommandSender sender, String[] args){
         double d = plugin.getServerBank().getBalance();
-        sender.sendMessage("El balance del banco del servidor es: " + d);
+        sender.sendMessage(plugin.getLang().getFrom("server_balance", "en").replace("%balance%", String.valueOf(d)));
     }
 }
