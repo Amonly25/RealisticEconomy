@@ -6,3 +6,11 @@ author: AMONLY
 depend: [Vault]
 commands:
   eco:
+    description: Main command for RealisticEconomy
+    usage: /eco <subcommand>
+    aliases: [economy]
+    permission: eco.user
+permissions:
+  eco.admin:
+    description: Allows access to all RealisticEconomy commands
+    default: op

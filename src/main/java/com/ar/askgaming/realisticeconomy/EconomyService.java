@@ -96,7 +96,9 @@ public class EconomyService implements Economy {
                 stmt.setString(2, data);
                 stmt.executeUpdate();
             }
-
+            if (Bukkit.getPlayer(uuid).isOnline()){
+                Bukkit.getPlayer(uuid).sendMessage("Has recibido " + amount + " del banco");
+            }
             return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.SUCCESS, "Depósito exitoso.");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -292,6 +294,96 @@ public class EconomyService implements Economy {
         return hasAccount(arg0);
     }
     //#endregion
+
+    public EconomyResponse payPlayer(UUID payerUUID, UUID receiverUUID, double amount) {
+        if (amount < 0) {
+            return new EconomyResponse(0, getBalance(payerUUID), EconomyResponse.ResponseType.FAILURE, "No se puede transferir una cantidad negativa.");
+        }
+    
+        double payerBalance = getBalance(payerUUID);
+    
+        if (payerBalance < amount) {
+            return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "No hay suficiente saldo.");
+        }
+    
+        try (Connection conn = database.connect()) {
+            conn.setAutoCommit(false); // Comenzar una transacción
+    
+            try {
+                // Asegurar que el receptor existe en la base de datos
+                String ensureReceiverSql = "INSERT OR IGNORE INTO economy (uuid, balance) VALUES (?, 0)";
+                try (PreparedStatement ensureStmt = conn.prepareStatement(ensureReceiverSql)) {
+                    ensureStmt.setString(1, receiverUUID.toString());
+                    ensureStmt.executeUpdate();
+                }
+    
+                // Actualizar el saldo del pagador
+                String withdrawSql = "UPDATE economy SET balance = balance - ? WHERE uuid = ? AND balance >= ?";
+                try (PreparedStatement withdrawStmt = conn.prepareStatement(withdrawSql)) {
+                    withdrawStmt.setDouble(1, amount);
+                    withdrawStmt.setString(2, payerUUID.toString());
+                    withdrawStmt.setDouble(3, amount);
+                    int rowsUpdated = withdrawStmt.executeUpdate();
+                    if (rowsUpdated == 0) {
+                        conn.rollback();
+                        return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "No se pudo actualizar el balance del pagador.");
+                    }
+                }
+    
+                // Actualizar el saldo del receptor
+                String depositSql = "UPDATE economy SET balance = balance + ? WHERE uuid = ?";
+                try (PreparedStatement depositStmt = conn.prepareStatement(depositSql)) {
+                    depositStmt.setDouble(1, amount);
+                    depositStmt.setString(2, receiverUUID.toString());
+                    depositStmt.executeUpdate();
+                }
+    
+                conn.commit(); // Finalizar la transacción
+    
+                double newPayerBalance = getBalance(payerUUID);
+                //double newReceiverBalance = getBalance(receiverUUID);
+                if (Bukkit.getPlayer(receiverUUID).isOnline()){
+                    Bukkit.getPlayer(receiverUUID).sendMessage("Has recibido " + amount + " de " + Bukkit.getPlayer(payerUUID).getName());
+                }
+                return new EconomyResponse(amount, newPayerBalance, EconomyResponse.ResponseType.SUCCESS, "Transferencia exitosa.");
+            } catch (SQLException e) {
+                conn.rollback(); // Revertir la transacción en caso de error
+                e.printStackTrace();
+                return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "Error al transferir.");
+            } finally {
+                conn.setAutoCommit(true); // Restablecer el modo de confirmación automática
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "Error al conectarse a la base de datos.");
+        }
+    }
+    public EconomyResponse payPlayer(Player payer, Player receiver, double amount) {
+        return payPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
+    }
+
+    public EconomyResponse payPlayer(Player payer, String receiverName, double amount) {
+
+        @SuppressWarnings("deprecation")
+        OfflinePlayer receiver = Bukkit.getOfflinePlayer(receiverName);
+        if (receiver.hasPlayedBefore()) {
+            return payPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
+        } else {
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "El jugador no existe.");
+        }
+    }
+    @SuppressWarnings("deprecation")
+    public EconomyResponse payPlayer(String payerName, String receiverName, double amount) {
+
+        OfflinePlayer receiver = Bukkit.getOfflinePlayer(receiverName);
+        OfflinePlayer payer = Bukkit.getOfflinePlayer(payerName);
+        if (receiver.hasPlayedBefore() && payer.hasPlayedBefore()) {
+            return payPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
+        } else {
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Alguno de los jugador no existe.");
+        }
+    }
+
 
     @Override
     public String currencyNamePlural() {

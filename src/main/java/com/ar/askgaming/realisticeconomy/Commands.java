@@ -34,6 +34,11 @@ public class Commands implements TabExecutor{
             lang = p.getLocale();
         }
 
+        if (args.length == 0){
+            sender.sendMessage("Error, use: /eco <balance|server|add|pay|take>");
+            return true;
+        }
+
         switch (args[0].toLowerCase()) {
             case "balance":
                 handleBalanceCommand(sender, args,lang);
@@ -45,10 +50,21 @@ public class Commands implements TabExecutor{
                 handleServerCommand(sender, args);
                 break;
             case "add":
-                handleAddCommand(sender, args);
+                if (sender.hasPermission("eco.admin")){
+                    handleAddCommand(sender, args);
+                } else {
+                    sender.sendMessage("You don't have permission to use this command.");
+                }
+                break;
+            case "pay":
+                handlePayCommand(sender, args);
                 break;
             case "take":
-                handleTakeCommand(sender, args);
+                if (sender.hasPermission("eco.admin")){
+                    handleTakeCommand(sender, args);
+                } else {
+                    sender.sendMessage("You don't have permission to use this command.");
+                }
                 break;
             case "check":
                 if (args.length == 2){
@@ -67,6 +83,32 @@ public class Commands implements TabExecutor{
         }
         return false;
     }
+    private void handlePayCommand(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player)){
+            sender.sendMessage("This command can only be executed by a player.");
+            return;
+        }
+        if (args.length != 3){
+            sender.sendMessage("Error, use: /eco pay <player> <amount>");
+            return;
+        }
+        Player p = (Player) sender;
+        try {
+            Double d = Double.valueOf(args[2]);
+
+            EconomyResponse e = plugin.getEconomyService().payPlayer(p, args[1], d);
+            if (e.transactionSuccess()){
+                p.sendMessage("Transaction successful, new balance: " + e.balance);
+            } else {
+                p.sendMessage("Transaction failed: " + e.errorMessage);
+            }
+
+        } catch (Exception e) {
+            p.sendMessage("Error: Invalid Number");
+        }
+        
+    }
+
     private void handleSetupCommand(CommandSender sender, String[] args) {
         if (args.length == 2) {
             try {
