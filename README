@@ -1,0 +1,13 @@
+A realistic plugin for Minecraft Servers
+
+Dependencies:
+    Vault
+
+Commands:
+
+    eco setup cuantity (This must be only setup at the beginig of the economy, if dont want fuck it. Only runs by the console.)
+
+    eco balance
+    eco balance player
+    eco add player amount (The money will be taken from the bank if is available)
+    eco take player amount (The money will be deposited to the bank)

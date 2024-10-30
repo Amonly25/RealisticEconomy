@@ -112,6 +112,7 @@ public class EconomyService implements Economy {
         if (p != null){
             return depositPlayer(p.getUniqueId(), amount);
         } else {
+            @SuppressWarnings("deprecation")
             OfflinePlayer offPlayer = Bukkit.getOfflinePlayer(playerName);
             if (offPlayer.hasPlayedBefore()) {
                 return depositPlayer(offPlayer.getUniqueId(), amount);

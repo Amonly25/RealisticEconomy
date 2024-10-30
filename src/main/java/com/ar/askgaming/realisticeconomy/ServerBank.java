@@ -35,6 +35,58 @@ public class ServerBank {
     
         return 0.0; // Devolver 0.0 si no se encuentra un balance o hay un error
     }
+    public EconomyResponse withdraw(double amount){
+        if (amount < 0) {
+            plugin.getServer().getLogger().warning("No se puede retirar un monto negativo.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "No se puede retirar un monto negativo.");
+        }   
+        double balance = getBalance();
+        if (balance < amount) {
+            plugin.getServer().getLogger().warning("No hay suficiente dinero en el banco del servidor.");
+            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "No hay suficiente dinero en el banco del servidor.");
+        } 
+        EconomyResponse e = modifyBalance(-amount);
+        if (e.transactionSuccess()){
+            return new EconomyResponse(amount, balance - amount, EconomyResponse.ResponseType.SUCCESS, "Retiro exitoso del banco, " + amount + " " + (balance - amount));
+        } 
+        return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "Error al retirar el monto.");
+        
+    }
+
+    public EconomyResponse deposit(double amount) {
+        if (amount < 0) {
+            plugin.getServer().getLogger().warning("No se puede depositar un monto negativo.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "No se puede depositar un monto negativo.");
+        }
+        EconomyResponse e = modifyBalance(amount);
+        if (e.transactionSuccess()){
+            return new EconomyResponse(amount, getBalance(), EconomyResponse.ResponseType.SUCCESS, "Balance del banco actualizado, " + amount + " " + getBalance());
+        } 
+        return new EconomyResponse(0, getBalance(), EconomyResponse.ResponseType.FAILURE, "Error al depositar el monto.");
+    }
+
+    private EconomyResponse modifyBalance(double d) {
+        double balance = getBalance();
+        double newBalance = balance + d;
+
+        try (Connection conn = database.connect()) {
+            String updateSql = "UPDATE serverbank SET balance = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(updateSql)) {
+                stmt.setDouble(1, newBalance);
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    plugin.getServer().getLogger().info("Se ha modificado el balance del servidor en " + d);
+                    return new EconomyResponse(d, newBalance, EconomyResponse.ResponseType.SUCCESS, "Balance modificado exitosamente.");
+                } else {
+                    plugin.getServer().getLogger().warning("No se encontró ningún registro para actualizar en 'serverbank'.");
+                    return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "No se encontró ningún registro para actualizar en 'serverbank'.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "Error al modificar el balance.");
+        }
+    }
 
     public void setup(double amount) {
         // Comprobar si el monto es negativo

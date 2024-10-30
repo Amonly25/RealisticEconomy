@@ -30,11 +30,14 @@ public class Commands implements TabExecutor{
         // TODO Auto-generated method stub
         switch (args[0].toLowerCase()) {
             case "balance":
-                    handleBalanceCommand(sender, args);
+                handleBalanceCommand(sender, args);
                 break;
             case "setup":
                 handleSetupCommand(sender, args);
-            break;
+                break;
+            case "server":
+                handleServerCommand(sender, args);
+                break;
             case "add":
                 handleAddCommand(sender, args);
                 break;
@@ -52,7 +55,6 @@ public class Commands implements TabExecutor{
                         sender.sendMessage(offPlayer.getUniqueId().toString());
                     }
                 }
-                
                 break;
             default:
                 break;
@@ -95,11 +97,18 @@ public class Commands implements TabExecutor{
     public void handleAddCommand(CommandSender sender, String[] args){
         if (args.length == 3){
             try {
-                EconomyResponse e = plugin.getEconomyService().depositPlayer(args[1], Double.valueOf(args[2]));
+                double d = Double.valueOf(args[2]);
+                EconomyResponse bank = plugin.getServerBank().withdraw(d);
+                if (!bank.transactionSuccess()){
+                    sender.sendMessage("No hay suficiente dinero en el banco del servidor.");
+                    return;
+                }
+                EconomyResponse e = plugin.getEconomyService().depositPlayer(args[1], d);
                 plugin.getLogger().info(e.errorMessage);
     
                 if (e.type == EconomyResponse.ResponseType.SUCCESS){
                     sender.sendMessage("Has añadido "+ e.amount + " al balance de " + args[1]);
+                    sender.sendMessage(bank.errorMessage);
                 } else {
                     sender.sendMessage("Error al añadir dinero al balance de " + args[1]);
                 }  
@@ -116,7 +125,12 @@ public class Commands implements TabExecutor{
                 EconomyResponse e = plugin.getEconomyService().withdrawPlayer(args[1], Double.valueOf(args[2]));
                 plugin.getLogger().info(e.errorMessage);
                 if (e.type == EconomyResponse.ResponseType.SUCCESS){
+                    EconomyResponse bank = plugin.getServerBank().deposit(e.amount);
                     sender.sendMessage("Has quitado "+e.amount+" al balance de " + args[1]);
+                    sender.sendMessage(bank.errorMessage);
+                    if (!bank.transactionSuccess()){
+                        sender.sendMessage("Error al depositar el dinero en el banco del servidor.");
+                    }
                 } else {
                     sender.sendMessage("Error al quitar dinero al balance de " + args[1]);
                 }
@@ -126,5 +140,9 @@ public class Commands implements TabExecutor{
         } else {
             sender.sendMessage("Faltan argumentos, uso: /eco take <jugador> <cantidad>");
         }
+    }
+    public void handleServerCommand(CommandSender sender, String[] args){
+        double d = plugin.getServerBank().getBalance();
+        sender.sendMessage("El balance del banco del servidor es: " + d);
     }
 }
