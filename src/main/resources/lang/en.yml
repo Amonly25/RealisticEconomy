@@ -1,3 +1,32 @@
 balance: "Your balance is %balance%: "
 balance_other: "Player %player% has %balance%: "
 server_balance: "Server balance is %balance%: "
+
+
+
+server_bank:
+    no_enough: "Server doesn't have enough money!"
+    withdraw: "A new withdraw of %amount% was made from the bank!"
+    deposit: "A new deposit of %amount% was made to the bank!"
+    new_balance: "Server balance is now %amount%"
+    deposit_player: "A deposit to %player% of %amount% was made!"
+    deposit_receiver: "You received %amount% from bank."
+    withdraw_player: "A withdraw from %player% of %amount% was made!"
+    withdraw_receiver: "%amount% was withdrawn from your account."
+
+economy:
+    cant_negative: "Cant withdraw negative amount!"
+    player_not_found: "Player not found!"
+    player_not_enough: "Player doesn't have enough money!"
+
+
+transactions:
+    pay: "You paid %amount% to %player%. Your balance is %balance%"
+    pay_other: "You received %amount% from %player%. Your balance is %balance%"
+    error: "An error occurred trying to %action%"
+    pay_success: "%payer% has paid %amount% to %receiver%"
+    payer_not_enough: "You don't have enough money to pay %amount% to %player%"
+
+commands:
+    no_perm: "You don't have permission to do that!"
+

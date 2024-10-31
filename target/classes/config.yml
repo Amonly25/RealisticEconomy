@@ -1,2 +1,8 @@
+#Server language is for servers messages and broadcasts
+#Besides that, each player can have their own language messages that has the Minecraft client.
+#If no language is found for a player in lang folder, en.yml will be used.
+
+server_language: "en"
+
 currency_name_singular: "Dollar"
 currency_name_plural: "Dollars"

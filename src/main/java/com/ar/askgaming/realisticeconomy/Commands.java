@@ -53,17 +53,17 @@ public class Commands implements TabExecutor{
                 if (sender.hasPermission("eco.admin")){
                     handleAddCommand(sender, args);
                 } else {
-                    sender.sendMessage("You don't have permission to use this command.");
+                    sender.sendMessage(plugin.getLang().getFrom("commands.no_perm", lang));
                 }
                 break;
             case "pay":
-                handlePayCommand(sender, args);
+                handlePayCommand(sender, args,lang);
                 break;
             case "take":
                 if (sender.hasPermission("eco.admin")){
                     handleTakeCommand(sender, args);
                 } else {
-                    sender.sendMessage("You don't have permission to use this command.");
+                    sender.sendMessage(plugin.getLang().getFrom("commands.no_perm", lang));
                 }
                 break;
             case "check":
@@ -83,7 +83,7 @@ public class Commands implements TabExecutor{
         }
         return false;
     }
-    private void handlePayCommand(CommandSender sender, String[] args) {
+    private void handlePayCommand(CommandSender sender, String[] args, String lang) {
         if (!(sender instanceof Player)){
             sender.sendMessage("This command can only be executed by a player.");
             return;
@@ -96,11 +96,11 @@ public class Commands implements TabExecutor{
         try {
             Double d = Double.valueOf(args[2]);
 
-            EconomyResponse e = plugin.getEconomyService().payPlayer(p, args[1], d);
+            EconomyResponse e = plugin.getEconomyService().playerPayPlayer(p, args[1], d);
             if (e.transactionSuccess()){
-                p.sendMessage("Transaction successful, new balance: " + e.balance);
+                p.sendMessage(plugin.getLang().getFrom("transactions.pay", lang).replace("%player%", args[1]).replace("%amount%", args[2]).replace("%balance%", String.valueOf(e.balance)));
             } else {
-                p.sendMessage("Transaction failed: " + e.errorMessage);
+                p.sendMessage(e.errorMessage);
             }
 
         } catch (Exception e) {

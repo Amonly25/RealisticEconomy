@@ -26,7 +26,12 @@ public class EconomyService implements Economy {
         plugin = main;
         database = plugin.getSqlDatabase();
     }
- 
+    private String getMsg(String key){
+        return plugin.getLang().getFrom(key, plugin.getServerLang());
+    }
+    private void log(String key){
+        plugin.getEconomyLogger().log(key);
+    }
     //#region createPlayerAccount
 
     public boolean createPlayerAccount(UUID uuid) {
@@ -79,8 +84,9 @@ public class EconomyService implements Economy {
     //#region depositPlayer
     public EconomyResponse depositPlayer(UUID uuid, double amount) {
         String data = uuid.toString();
+        OfflinePlayer offPlayer = Bukkit.getOfflinePlayer(uuid);
         if (amount < 0) {
-            return new EconomyResponse(0, getBalance(uuid), EconomyResponse.ResponseType.FAILURE, "No se puede depositar una cantidad negativa.");
+            return new EconomyResponse(0, getBalance(uuid), EconomyResponse.ResponseType.FAILURE, getMsg("economy.cant_negative"));
         }
         
         try (Connection conn = database.connect()) {
@@ -96,13 +102,15 @@ public class EconomyService implements Economy {
                 stmt.setString(2, data);
                 stmt.executeUpdate();
             }
-            if (Bukkit.getPlayer(uuid).isOnline()){
-                Bukkit.getPlayer(uuid).sendMessage("Has recibido " + amount + " del banco");
+            if (offPlayer.isOnline()){
+                offPlayer.getPlayer().sendMessage(getMsg("bank.deposit_receiver").replace("%amount%", String.valueOf(amount)));
             }
-            return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.SUCCESS, "Depósito exitoso.");
+            String s = getMsg("bank.deposit_player").replace("%amount%", String.valueOf(amount)).replace("%player%", offPlayer.getName());
+            log(s);
+            return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.SUCCESS, s);
         } catch (SQLException e) {
             e.printStackTrace();
-            return new EconomyResponse(0, getBalance(uuid), EconomyResponse.ResponseType.FAILURE, "Error al depositar.");
+            return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Player Deposit"));
         }
     }
     public EconomyResponse depositPlayer(Player player, double amount) {
@@ -119,7 +127,7 @@ public class EconomyService implements Economy {
             if (offPlayer.hasPlayedBefore()) {
                 return depositPlayer(offPlayer.getUniqueId(), amount);
             } else {
-                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "El jugador no existe.");
+                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_found"));
             }
         }
     }
@@ -128,7 +136,7 @@ public class EconomyService implements Economy {
         if (offlinePlayer.hasPlayedBefore()){
             return depositPlayer(offlinePlayer.getUniqueId(), amount);
         }else {
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "El jugador no existe.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_found"));
         }
         
     }
@@ -212,7 +220,7 @@ public class EconomyService implements Economy {
 
     //#region withdrawPlayer
     public EconomyResponse withdrawPlayer(UUID uuid, double amount) {
-
+        OfflinePlayer offPlayer = Bukkit.getOfflinePlayer(uuid);
         double balance = getBalance(uuid);
         if (balance >= amount) {
             try (Connection conn = database.connect()) {
@@ -223,17 +231,22 @@ public class EconomyService implements Economy {
                     stmt.setDouble(3, amount);
                     int rowsUpdated = stmt.executeUpdate();
                     if (rowsUpdated > 0) {
-                        return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.SUCCESS, "Retiro exitoso.");
+                        if (offPlayer.isOnline()){
+                            offPlayer.getPlayer().sendMessage(getMsg("bank.withdraw_receiver").replace("%amount%", String.valueOf(amount)));
+                        }
+                        String s = getMsg("server_bank.withdraw").replace("%amount%", String.valueOf(amount)).replace("%player%", offPlayer.getName());
+                        log(s);
+                        return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.SUCCESS, s);
                     } else {
-                        return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "No se pudo actualizar el balance.");
+                        return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Player Withdraw Database"));
                     }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-                return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "Error al retirar.");
+                return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Player Withdraw"));
             }
         } else {
-            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "No hay suficiente saldo.");
+            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_enough"));
         }
     }
     @Override
@@ -247,7 +260,7 @@ public class EconomyService implements Economy {
             if (offPlayer.hasPlayedBefore()) {
                 return withdrawPlayer(offPlayer.getUniqueId(), amount);
             } else {
-                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "El jugador no existe.");
+                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_found"));
             }
         }
     }
@@ -257,7 +270,7 @@ public class EconomyService implements Economy {
         if (offlinePlayer.hasPlayedBefore()){
             return withdrawPlayer(offlinePlayer.getUniqueId(), amount);
         }else {
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "El jugador no existe.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_found"));
         }
     }
     @Override
@@ -295,15 +308,15 @@ public class EconomyService implements Economy {
     }
     //#endregion
 
-    public EconomyResponse payPlayer(UUID payerUUID, UUID receiverUUID, double amount) {
+    public EconomyResponse playerPayPlayer(UUID payer, UUID receiver, double amount) {
         if (amount < 0) {
-            return new EconomyResponse(0, getBalance(payerUUID), EconomyResponse.ResponseType.FAILURE, "No se puede transferir una cantidad negativa.");
+            return new EconomyResponse(0, getBalance(payer), EconomyResponse.ResponseType.FAILURE, getMsg("economy.cant_negative"));
         }
     
-        double payerBalance = getBalance(payerUUID);
+        double payerBalance = getBalance(payer);
     
         if (payerBalance < amount) {
-            return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "No hay suficiente saldo.");
+            return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.payer_not_enough"));
         }
     
         try (Connection conn = database.connect()) {
@@ -313,7 +326,7 @@ public class EconomyService implements Economy {
                 // Asegurar que el receptor existe en la base de datos
                 String ensureReceiverSql = "INSERT OR IGNORE INTO economy (uuid, balance) VALUES (?, 0)";
                 try (PreparedStatement ensureStmt = conn.prepareStatement(ensureReceiverSql)) {
-                    ensureStmt.setString(1, receiverUUID.toString());
+                    ensureStmt.setString(1, receiver.toString());
                     ensureStmt.executeUpdate();
                 }
     
@@ -321,12 +334,12 @@ public class EconomyService implements Economy {
                 String withdrawSql = "UPDATE economy SET balance = balance - ? WHERE uuid = ? AND balance >= ?";
                 try (PreparedStatement withdrawStmt = conn.prepareStatement(withdrawSql)) {
                     withdrawStmt.setDouble(1, amount);
-                    withdrawStmt.setString(2, payerUUID.toString());
+                    withdrawStmt.setString(2, payer.toString());
                     withdrawStmt.setDouble(3, amount);
                     int rowsUpdated = withdrawStmt.executeUpdate();
                     if (rowsUpdated == 0) {
                         conn.rollback();
-                        return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "No se pudo actualizar el balance del pagador.");
+                        return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Player Withdraw Database"));
                     }
                 }
     
@@ -334,53 +347,52 @@ public class EconomyService implements Economy {
                 String depositSql = "UPDATE economy SET balance = balance + ? WHERE uuid = ?";
                 try (PreparedStatement depositStmt = conn.prepareStatement(depositSql)) {
                     depositStmt.setDouble(1, amount);
-                    depositStmt.setString(2, receiverUUID.toString());
+                    depositStmt.setString(2, receiver.toString());
                     depositStmt.executeUpdate();
                 }
     
                 conn.commit(); // Finalizar la transacción
     
-                double newPayerBalance = getBalance(payerUUID);
+                double newPayerBalance = getBalance(payer);
                 //double newReceiverBalance = getBalance(receiverUUID);
-                if (Bukkit.getPlayer(receiverUUID).isOnline()){
-                    Bukkit.getPlayer(receiverUUID).sendMessage("Has recibido " + amount + " de " + Bukkit.getPlayer(payerUUID).getName());
+                if (Bukkit.getOfflinePlayer(receiver).isOnline()){
+                    Bukkit.getPlayer(receiver).sendMessage(getMsg("transactions.receive").replace("%amount%", String.valueOf(amount)).replace("%player%", Bukkit.getPlayer(payer).getName()));
                 }
-                return new EconomyResponse(amount, newPayerBalance, EconomyResponse.ResponseType.SUCCESS, "Transferencia exitosa.");
+                String s = getMsg("transactions.pay_succed").replace("%amount%", String.valueOf(amount)).replace("%receiver%", Bukkit.getOfflinePlayer(receiver).getName()).replace("%payer%", Bukkit.getOfflinePlayer(payer).getName());
+                log(s);
+                return new EconomyResponse(amount, newPayerBalance, EconomyResponse.ResponseType.SUCCESS, s);
             } catch (SQLException e) {
                 conn.rollback(); // Revertir la transacción en caso de error
                 e.printStackTrace();
-                return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "Error al transferir.");
+                return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Player Pay Player Database rollback"));
             } finally {
                 conn.setAutoCommit(true); // Restablecer el modo de confirmación automática
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, "Error al conectarse a la base de datos.");
+            return new EconomyResponse(0, payerBalance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Player Pay Player Database"));
         }
     }
-    public EconomyResponse payPlayer(Player payer, Player receiver, double amount) {
-        return payPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
-    }
 
-    public EconomyResponse payPlayer(Player payer, String receiverName, double amount) {
+    public EconomyResponse playerPayPlayer(Player payer, String receiverName, double amount) {
 
         @SuppressWarnings("deprecation")
         OfflinePlayer receiver = Bukkit.getOfflinePlayer(receiverName);
         if (receiver.hasPlayedBefore()) {
-            return payPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
+            return playerPayPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
         } else {
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "El jugador no existe.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_found"));
         }
     }
     @SuppressWarnings("deprecation")
-    public EconomyResponse payPlayer(String payerName, String receiverName, double amount) {
+    public EconomyResponse playerPayPlayer(String payerName, String receiverName, double amount) {
 
         OfflinePlayer receiver = Bukkit.getOfflinePlayer(receiverName);
         OfflinePlayer payer = Bukkit.getOfflinePlayer(payerName);
         if (receiver.hasPlayedBefore() && payer.hasPlayedBefore()) {
-            return payPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
+            return playerPayPlayer(payer.getUniqueId(), receiver.getUniqueId(), amount);
         } else {
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Alguno de los jugador no existe.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_found"));
         }
     }
 
@@ -419,8 +431,7 @@ public class EconomyService implements Economy {
 
     @Override
     public boolean hasBankSupport() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'hasBankSupport'");
+        return false;
     }
     @Override
     public EconomyResponse isBankMember(String arg0, String arg1) {

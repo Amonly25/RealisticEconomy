@@ -19,6 +19,13 @@ public class ServerBank {
         database = plugin.getSqlDatabase();
     }
 
+    private String getMsg(String key){
+        return plugin.getLang().getFrom(key, plugin.getServerLang());
+    }
+    private void log(String key){
+        plugin.getEconomyLogger().log(key);
+    }
+
     public double getBalance() {
 
         String sql = "SELECT balance FROM serverbank LIMIT 1"; // Consulta para obtener el balance
@@ -30,39 +37,44 @@ public class ServerBank {
                 return rs.getDouble("balance"); // Devolver el balance obtenido
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Manejar posibles excepciones
+            e.printStackTrace(); // Manejar posibles excepciones  
         }
     
         return 0.0; // Devolver 0.0 si no se encuentra un balance o hay un error
     }
     public EconomyResponse withdraw(double amount){
         if (amount < 0) {
-            plugin.getServer().getLogger().warning("No se puede retirar un monto negativo.");
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "No se puede retirar un monto negativo.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.cant_negative"));
         }   
         double balance = getBalance();
         if (balance < amount) {
-            plugin.getServer().getLogger().warning("No hay suficiente dinero en el banco del servidor.");
-            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "No hay suficiente dinero en el banco del servidor.");
+            log(getMsg("server_bank.no_enough"));
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("server_bank.no_enough"));
         } 
         EconomyResponse e = modifyBalance(-amount);
         if (e.transactionSuccess()){
-            return new EconomyResponse(amount, balance - amount, EconomyResponse.ResponseType.SUCCESS, "Retiro exitoso del banco, " + amount + " " + (balance - amount));
+            String s = getMsg("server_bank.withdraw").replace("%amount%", String.valueOf(amount));
+            log(s);
+            return new EconomyResponse(amount, balance - amount, EconomyResponse.ResponseType.SUCCESS, s);
         } 
-        return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "Error al retirar el monto.");
+        log(getMsg("transactions.error").replace("%action%","Withdraw bank"));
+        return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Withdraw bank"));
         
     }
 
     public EconomyResponse deposit(double amount) {
         if (amount < 0) {
-            plugin.getServer().getLogger().warning("No se puede depositar un monto negativo.");
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "No se puede depositar un monto negativo.");
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.cant_negative"));
         }
         EconomyResponse e = modifyBalance(amount);
         if (e.transactionSuccess()){
-            return new EconomyResponse(amount, getBalance(), EconomyResponse.ResponseType.SUCCESS, "Balance del banco actualizado, " + amount + " " + getBalance());
+            String s = getMsg("server_bank.deposit").replace("%amount%", String.valueOf(amount));
+            log(s);
+            return new EconomyResponse(amount, getBalance(), EconomyResponse.ResponseType.SUCCESS, s);
         } 
-        return new EconomyResponse(0, getBalance(), EconomyResponse.ResponseType.FAILURE, "Error al depositar el monto.");
+        String s = getMsg("transactions.error").replace("%action%","Deposit bank");
+        log(s);
+        return new EconomyResponse(0, e.balance, EconomyResponse.ResponseType.FAILURE, s);
     }
 
     private EconomyResponse modifyBalance(double d) {
@@ -75,24 +87,26 @@ public class ServerBank {
                 stmt.setDouble(1, newBalance);
                 int rowsUpdated = stmt.executeUpdate();
                 if (rowsUpdated > 0) {
-                    plugin.getServer().getLogger().info("Se ha modificado el balance del servidor en " + d);
-                    return new EconomyResponse(d, newBalance, EconomyResponse.ResponseType.SUCCESS, "Balance modificado exitosamente.");
+                    String s = getMsg("server_bank.new_balance").replace("%amount%", String.valueOf(d));
+                    log(s);
+                    return new EconomyResponse(d, newBalance, EconomyResponse.ResponseType.SUCCESS, s);
                 } else {
-                    plugin.getServer().getLogger().warning("No se encontró ningún registro para actualizar en 'serverbank'.");
-                    return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "No se encontró ningún registro para actualizar en 'serverbank'.");
+                    String s = getMsg("transactions.error").replace("%action%","Modify bank balance database");
+                    log(s);
+                    return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, s);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "Error al modificar el balance.");
+            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Modify bank balance"));
         }
     }
 
     public void setup(double amount) {
-        // Comprobar si el monto es negativo
+
         if (amount < 0) {
-            plugin.getServer().getLogger().warning("No se puede establecer un balance negativo.");
-            return; // Salir del método si el monto es negativo
+            plugin.getServer().getLogger().warning("Cant setup a negative balance");
+            return; 
         }
     
         // Conectar a la base de datos
@@ -109,9 +123,9 @@ public class ServerBank {
     
                 // Verificar si se actualizó alguna fila
                 if (rowsUpdated > 0) {
-                    plugin.getServer().getLogger().info("Se ha establecido el balance del servidor en " + amount);
+                    plugin.getServer().getLogger().info("You have been setup the economy to " + amount);
                 } else {
-                    plugin.getServer().getLogger().warning("No se encontró ningún registro para actualizar en 'serverbank'.");
+                    plugin.getServer().getLogger().warning("An error occurred while updating the database");
                 }
             }
         } catch (SQLException e) {
