@@ -2,8 +2,6 @@ balance: "Your balance is %balance%: "
 balance_other: "Player %player% has %balance%: "
 server_balance: "Server balance is %balance%: "
 
-
-
 server_bank:
     no_enough: "Server doesn't have enough money!"
     withdraw: "A new withdraw of %amount% was made from the bank!"
@@ -18,7 +16,6 @@ economy:
     cant_negative: "Cant withdraw negative amount!"
     player_not_found: "Player not found!"
     player_not_enough: "Player doesn't have enough money!"
-
 
 transactions:
     pay: "You paid %amount% to %player%. Your balance is %balance%"

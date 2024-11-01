@@ -87,8 +87,7 @@ public class ServerBank {
                 stmt.setDouble(1, newBalance);
                 int rowsUpdated = stmt.executeUpdate();
                 if (rowsUpdated > 0) {
-                    String s = getMsg("server_bank.new_balance").replace("%amount%", String.valueOf(d));
-                    log(s);
+                    String s = getMsg("server_bank.new_balance").replace("%amount%", String.valueOf(newBalance));
                     return new EconomyResponse(d, newBalance, EconomyResponse.ResponseType.SUCCESS, s);
                 } else {
                     String s = getMsg("transactions.error").replace("%action%","Modify bank balance database");

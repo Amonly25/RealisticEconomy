@@ -28,7 +28,7 @@ public class Commands implements TabExecutor{
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // TODO Auto-generated method stub
-        String lang = "en";
+        String lang = plugin.getServerLang();
         if (sender instanceof Player){
             Player p = (Player) sender;
             lang = p.getLocale();
@@ -51,7 +51,7 @@ public class Commands implements TabExecutor{
                 break;
             case "add":
                 if (sender.hasPermission("eco.admin")){
-                    handleAddCommand(sender, args);
+                    handleAddCommand(sender, args,lang);
                 } else {
                     sender.sendMessage(plugin.getLang().getFrom("commands.no_perm", lang));
                 }
@@ -79,9 +79,10 @@ public class Commands implements TabExecutor{
                 }
                 break;
             default:
+                sender.sendMessage("Error, use: /eco <balance|server|add|pay|take>");
                 break;
         }
-        return false;
+        return true;
     }
     private void handlePayCommand(CommandSender sender, String[] args, String lang) {
         if (!(sender instanceof Player)){
@@ -142,10 +143,18 @@ public class Commands implements TabExecutor{
         }
     }
    
-    public void handleAddCommand(CommandSender sender, String[] args){
+    @SuppressWarnings("deprecation")
+    public void handleAddCommand(CommandSender sender, String[] args, String lang){
         if (args.length == 3){
             try {
                 double d = Double.valueOf(args[2]);
+
+                if (!Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore()){
+                    sender.sendMessage(plugin.getLang().getFrom("economy.player_not_found",lang));
+                    return;
+
+                }
+
                 EconomyResponse bank = plugin.getServerBank().withdraw(d);
                 sender.sendMessage(bank.errorMessage);
 

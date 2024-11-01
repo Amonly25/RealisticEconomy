@@ -103,9 +103,9 @@ public class EconomyService implements Economy {
                 stmt.executeUpdate();
             }
             if (offPlayer.isOnline()){
-                offPlayer.getPlayer().sendMessage(getMsg("bank.deposit_receiver").replace("%amount%", String.valueOf(amount)));
+                offPlayer.getPlayer().sendMessage(getMsg("server_bank.deposit_receiver").replace("%amount%", String.valueOf(amount)));
             }
-            String s = getMsg("bank.deposit_player").replace("%amount%", String.valueOf(amount)).replace("%player%", offPlayer.getName());
+            String s = getMsg("server_bank.deposit_player").replace("%amount%", String.valueOf(amount)).replace("%player%", offPlayer.getName());
             log(s);
             return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.SUCCESS, s);
         } catch (SQLException e) {
@@ -232,9 +232,9 @@ public class EconomyService implements Economy {
                     int rowsUpdated = stmt.executeUpdate();
                     if (rowsUpdated > 0) {
                         if (offPlayer.isOnline()){
-                            offPlayer.getPlayer().sendMessage(getMsg("bank.withdraw_receiver").replace("%amount%", String.valueOf(amount)));
+                            offPlayer.getPlayer().sendMessage(getMsg("server_bank.withdraw_receiver").replace("%amount%", String.valueOf(amount)));
                         }
-                        String s = getMsg("server_bank.withdraw").replace("%amount%", String.valueOf(amount)).replace("%player%", offPlayer.getName());
+                        String s = getMsg("server_bank.withdraw_player").replace("%amount%", String.valueOf(amount)).replace("%player%", offPlayer.getName());
                         log(s);
                         return new EconomyResponse(amount, getBalance(uuid), EconomyResponse.ResponseType.SUCCESS, s);
                     } else {
@@ -307,7 +307,7 @@ public class EconomyService implements Economy {
         return hasAccount(arg0);
     }
     //#endregion
-
+    //#region playerPayPlayer
     public EconomyResponse playerPayPlayer(UUID payer, UUID receiver, double amount) {
         if (amount < 0) {
             return new EconomyResponse(0, getBalance(payer), EconomyResponse.ResponseType.FAILURE, getMsg("economy.cant_negative"));
@@ -358,7 +358,7 @@ public class EconomyService implements Economy {
                 if (Bukkit.getOfflinePlayer(receiver).isOnline()){
                     Bukkit.getPlayer(receiver).sendMessage(getMsg("transactions.receive").replace("%amount%", String.valueOf(amount)).replace("%player%", Bukkit.getPlayer(payer).getName()));
                 }
-                String s = getMsg("transactions.pay_succed").replace("%amount%", String.valueOf(amount)).replace("%receiver%", Bukkit.getOfflinePlayer(receiver).getName()).replace("%payer%", Bukkit.getOfflinePlayer(payer).getName());
+                String s = getMsg("transactions.pay_success").replace("%amount%", String.valueOf(amount)).replace("%receiver%", Bukkit.getOfflinePlayer(receiver).getName()).replace("%payer%", Bukkit.getOfflinePlayer(payer).getName());
                 log(s);
                 return new EconomyResponse(amount, newPayerBalance, EconomyResponse.ResponseType.SUCCESS, s);
             } catch (SQLException e) {
@@ -395,7 +395,7 @@ public class EconomyService implements Economy {
             return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.player_not_found"));
         }
     }
-
+    ////#endregion
 
     @Override
     public String currencyNamePlural() {
