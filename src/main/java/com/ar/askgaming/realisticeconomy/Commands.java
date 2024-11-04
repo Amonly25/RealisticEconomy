@@ -14,8 +14,8 @@ import net.milkbowl.vault.economy.EconomyResponse;
 
 public class Commands implements TabExecutor{
 
-    private final Main plugin;
-    public Commands(Main main) {
+    private final RealisticEconomy plugin;
+    public Commands(RealisticEconomy main) {
         plugin = main;
     }
 

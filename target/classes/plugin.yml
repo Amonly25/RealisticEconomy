@@ -1,4 +1,4 @@
-main: com.ar.askgaming.realisticeconomy.Main
+main: com.ar.askgaming.realisticeconomy.RealisticEconomy
 name: RealisticEconomy
 api-version: 1.21
 version: 1

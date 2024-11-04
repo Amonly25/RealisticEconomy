@@ -19,7 +19,7 @@ economy:
 
 transactions:
     pay: "You paid %amount% to %player%. Your balance is %balance%"
-    pay_other: "You received %amount% from %player%. Your balance is %balance%"
+    pay_other: "You received %amount% from %player%."
     error: "An error occurred trying to %action%"
     pay_success: "%payer% has paid %amount% to %receiver%"
     payer_not_enough: "You don't have enough money to pay %amount% to %player%"

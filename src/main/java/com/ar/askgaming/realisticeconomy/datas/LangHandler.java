@@ -8,12 +8,12 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.ar.askgaming.realisticeconomy.Main;
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class LangHandler {
 
-    private Main plugin;
-    public LangHandler(Main plugin) {
+    private RealisticEconomy plugin;
+    public LangHandler(RealisticEconomy plugin) {
         this.plugin = plugin;
 
         // Save default lang file from resources if it doesn't exist

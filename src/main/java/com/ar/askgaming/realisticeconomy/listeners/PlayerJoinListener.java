@@ -5,13 +5,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import com.ar.askgaming.realisticeconomy.Main;
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class PlayerJoinListener implements Listener{
 
-    private Main plugin;
+    private RealisticEconomy plugin;
 
-    public PlayerJoinListener(Main main) {
+    public PlayerJoinListener(RealisticEconomy main) {
         plugin = main;
     }
 
@@ -19,5 +19,6 @@ public class PlayerJoinListener implements Listener{
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         plugin.getEconomyService().createPlayerAccount(player);
+        
     }
 }

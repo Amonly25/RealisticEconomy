@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.ar.askgaming.realisticeconomy.Main;
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class EconomyLogger {
 
@@ -19,8 +19,8 @@ public class EconomyLogger {
     public boolean isEnabled() {
         return enabled;
     }
-    private Main plugin;
-    public EconomyLogger(Main main) {
+    private RealisticEconomy plugin;
+    public EconomyLogger(RealisticEconomy main) {
         plugin = main;
         enabled = main.getConfig().getBoolean("log_economy", true);
 

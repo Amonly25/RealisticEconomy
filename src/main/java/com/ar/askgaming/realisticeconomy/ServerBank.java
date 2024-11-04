@@ -12,9 +12,9 @@ import net.milkbowl.vault.economy.EconomyResponse;
 public class ServerBank {
 
     private final SQLiteDatabase database;
-    private Main plugin;
+    private RealisticEconomy plugin;
 
-    public ServerBank(Main main) {
+    public ServerBank(RealisticEconomy main) {
         plugin = main;
         database = plugin.getSqlDatabase();
     }

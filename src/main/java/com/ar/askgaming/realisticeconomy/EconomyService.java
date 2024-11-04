@@ -20,9 +20,9 @@ import net.milkbowl.vault.economy.EconomyResponse;
 public class EconomyService implements Economy {
 
     private final SQLiteDatabase database;
-    private Main plugin;
+    private RealisticEconomy plugin;
 
-    public EconomyService(Main main) {
+    public EconomyService(RealisticEconomy main) {
         plugin = main;
         database = plugin.getSqlDatabase();
     }
@@ -356,7 +356,7 @@ public class EconomyService implements Economy {
                 double newPayerBalance = getBalance(payer);
                 //double newReceiverBalance = getBalance(receiverUUID);
                 if (Bukkit.getOfflinePlayer(receiver).isOnline()){
-                    Bukkit.getPlayer(receiver).sendMessage(getMsg("transactions.receive").replace("%amount%", String.valueOf(amount)).replace("%player%", Bukkit.getPlayer(payer).getName()));
+                    Bukkit.getPlayer(receiver).sendMessage(getMsg("transactions.pay_other").replace("%amount%", String.valueOf(amount)).replace("%player%", Bukkit.getPlayer(payer).getName()));
                 }
                 String s = getMsg("transactions.pay_success").replace("%amount%", String.valueOf(amount)).replace("%receiver%", Bukkit.getOfflinePlayer(receiver).getName()).replace("%payer%", Bukkit.getOfflinePlayer(payer).getName());
                 log(s);

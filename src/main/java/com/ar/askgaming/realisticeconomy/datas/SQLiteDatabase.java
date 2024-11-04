@@ -5,13 +5,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.ar.askgaming.realisticeconomy.Main;
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class SQLiteDatabase {
 
     private final String url;
 
-    public SQLiteDatabase(Main main, String dbFile) {
+    public SQLiteDatabase(RealisticEconomy main, String dbFile) {
         url = "jdbc:sqlite:" + dbFile;
 
         createTable();

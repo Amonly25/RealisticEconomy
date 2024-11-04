@@ -10,7 +10,7 @@ import com.ar.askgaming.realisticeconomy.utils.EconomyLogger;
 
 import net.milkbowl.vault.economy.Economy;
 
-public class Main extends JavaPlugin{
+public class RealisticEconomy extends JavaPlugin{
 
     private String serverLang;
 
