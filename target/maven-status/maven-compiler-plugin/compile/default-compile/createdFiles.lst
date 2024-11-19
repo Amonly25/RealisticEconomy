@@ -1,8 +1,12 @@
+com\ar\askgaming\realisticeconomy\datas\LangManager.class
+com\ar\askgaming\realisticeconomy\datas\DatabaseManager.class
 com\ar\askgaming\realisticeconomy\Commands.class
+com\ar\askgaming\realisticeconomy\PlayerData.class
 com\ar\askgaming\realisticeconomy\RealisticEconomy.class
-com\ar\askgaming\realisticeconomy\datas\LangHandler.class
 com\ar\askgaming\realisticeconomy\listeners\PlayerJoinListener.class
+com\ar\askgaming\realisticeconomy\utils\UtilityMethods.class
+com\ar\askgaming\realisticeconomy\Economy.class
 com\ar\askgaming\realisticeconomy\ServerBank.class
+com\ar\askgaming\realisticeconomy\EconomyTransactions.class
 com\ar\askgaming\realisticeconomy\utils\EconomyLogger.class
-com\ar\askgaming\realisticeconomy\datas\SQLiteDatabase.class
-com\ar\askgaming\realisticeconomy\EconomyService.class
+com\ar\askgaming\realisticeconomy\utils\VaultHook.class

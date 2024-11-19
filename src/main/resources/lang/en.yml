@@ -1,29 +1,30 @@
 balance: "Your balance is %balance%: "
+bank_balance: "Bank balance is %balance%: "
+debt: "You owe %amount% to the bank!"
+tokens: "You have %amount% tokens!"
+
 balance_other: "Player %player% has %balance%: "
 server_balance: "Server balance is %balance%: "
 
-server_bank:
-    no_enough: "Server doesn't have enough money!"
-    withdraw: "A new withdraw of %amount% was made from the bank!"
-    deposit: "A new deposit of %amount% was made to the bank!"
-    new_balance: "Server balance is now %amount%"
-    deposit_player: "A deposit to %player% of %amount% was made!"
-    deposit_receiver: "You received %amount% from bank."
-    withdraw_player: "A withdraw from %player% of %amount% was made!"
-    withdraw_receiver: "%amount% was withdrawn from your account."
-
 economy:
-    cant_negative: "Cant withdraw negative amount!"
-    player_not_found: "Player not found!"
-    player_not_enough: "Player doesn't have enough money!"
+    add_player: "&aHas been added %amount% to %player% from server bank!"
+    add_player_notify: "&aYou have received %amount% from the server bank!"
+    take_player: "&cHas been taked %amount% from %player% to server bank!"
+    take_player_notify: "&cYou have been taken %amount% from your balance to the server bank!"
+    set_player: "&aPlayer %player% balance was set to %amount%!"
+    set_player_notify: "&aYour balance was set to %amount%!"
+
+error:
+    player_not_found: "&cPlayer not found!"
+    transaction: "&cError in the transaction, try again later or check the balance."
+    invalid_amount: "&cInvalid amount!"
 
 transactions:
-    pay: "You paid %amount% to %player%. Your balance is %balance%"
-    pay_other: "You received %amount% from %player%."
-    error: "An error occurred trying to %action%"
-    pay_success: "%payer% has paid %amount% to %receiver%"
-    payer_not_enough: "You don't have enough money to pay %amount% to %player%"
+    pay: "You paid %amount% to %player%."
+    pay_notify: "%player% has paid you %amount%."
 
 commands:
     no_perm: "You don't have permission to do that!"
 
+misc:
+    pages: "Balance top: pages "

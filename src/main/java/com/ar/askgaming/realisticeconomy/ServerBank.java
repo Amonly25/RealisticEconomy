@@ -4,24 +4,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
-import com.ar.askgaming.realisticeconomy.datas.SQLiteDatabase;
-
-import net.milkbowl.vault.economy.EconomyResponse;
+import com.ar.askgaming.realisticeconomy.datas.DatabaseManager;
 
 public class ServerBank {
 
-    private final SQLiteDatabase database;
+    private DatabaseManager database;
     private RealisticEconomy plugin;
 
     public ServerBank(RealisticEconomy main) {
         plugin = main;
-        database = plugin.getSqlDatabase();
+        database = plugin.getDatabase();
     }
 
-    private String getMsg(String key){
-        return plugin.getLang().getFrom(key, plugin.getServerLang());
-    }
     private void log(String key){
         plugin.getEconomyLogger().log(key);
     }
@@ -42,93 +38,107 @@ public class ServerBank {
     
         return 0.0; // Devolver 0.0 si no se encuentra un balance o hay un error
     }
-    public EconomyResponse withdraw(double amount){
+    public boolean withdrawFromServerToPlayer(UUID playerUUID, double amount) {
         if (amount < 0) {
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.cant_negative"));
-        }   
-        double balance = getBalance();
-        if (balance < amount) {
-            log(getMsg("server_bank.no_enough"));
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("server_bank.no_enough"));
-        } 
-        EconomyResponse e = modifyBalance(-amount);
-        if (e.transactionSuccess()){
-            String s = getMsg("server_bank.withdraw").replace("%amount%", String.valueOf(amount));
-            log(s);
-            return new EconomyResponse(amount, balance - amount, EconomyResponse.ResponseType.SUCCESS, s);
-        } 
-        log(getMsg("transactions.error").replace("%action%","Withdraw bank"));
-        return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Withdraw bank"));
-        
-    }
-
-    public EconomyResponse deposit(double amount) {
-        if (amount < 0) {
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, getMsg("economy.cant_negative"));
+            return false;
         }
-        EconomyResponse e = modifyBalance(amount);
-        if (e.transactionSuccess()){
-            String s = getMsg("server_bank.deposit").replace("%amount%", String.valueOf(amount));
-            log(s);
-            return new EconomyResponse(amount, getBalance(), EconomyResponse.ResponseType.SUCCESS, s);
-        } 
-        String s = getMsg("transactions.error").replace("%action%","Deposit bank");
-        log(s);
-        return new EconomyResponse(0, e.balance, EconomyResponse.ResponseType.FAILURE, s);
-    }
-
-    private EconomyResponse modifyBalance(double d) {
-        double balance = getBalance();
-        double newBalance = balance + d;
+    
+        double serverBalance = getBalance();
+        if (serverBalance < amount) {
+            return false;
+        }
+    
+        PlayerData playerData = plugin.getDatabase().loadPlayerData(playerUUID);
+        if (playerData == null) {
+            return false;
+        }
+    
+        playerData.setBalance(playerData.getBalance() + amount);
+        boolean step = playerData.save();
+        if (!step) {
+            playerData.setBalance(playerData.getBalance() - amount);
+            return false;
+        }
 
         try (Connection conn = database.connect()) {
-            String updateSql = "UPDATE serverbank SET balance = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(updateSql)) {
-                stmt.setDouble(1, newBalance);
-                int rowsUpdated = stmt.executeUpdate();
-                if (rowsUpdated > 0) {
-                    String s = getMsg("server_bank.new_balance").replace("%amount%", String.valueOf(newBalance));
-                    return new EconomyResponse(d, newBalance, EconomyResponse.ResponseType.SUCCESS, s);
-                } else {
-                    String s = getMsg("transactions.error").replace("%action%","Modify bank balance database");
-                    log(s);
-                    return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, s);
-                }
+            conn.setAutoCommit(false); // Iniciar la transacción
+    
+            // Actualizar el balance del banco del servidor
+            if (!saveServerBankBalance(serverBalance - amount, serverBalance, conn)) {
+                return false;
             }
+        
+            conn.commit(); // Confirmar la transacción
+            return true;
+    
+        } catch (SQLException e) {
+            playerData.setBalance(playerData.getBalance() - amount);
+            playerData.save();
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+
+    public boolean depositFromPlayerToServer(UUID playerUUID, double amount) {
+        if (amount < 0) {
+            return false;
+        }
+    
+        PlayerData playerData = plugin.getDatabase().loadPlayerData(playerUUID);
+        if (playerData == null) {
+            return false;
+        }
+    
+        double playerBalance = playerData.getBalance();
+        if (playerBalance < amount) {
+            return false;
+        }
+    
+        playerData.setBalance(playerBalance - amount);
+        boolean step = playerData.save();
+        if (!step) {
+            playerData.setBalance(playerBalance + amount);
+            return false;
+        }
+        
+        try (Connection conn = database.connect()) {
+            conn.setAutoCommit(false); // Iniciar la transacción
+        
+            // Actualizar el balance del banco del servidor
+            if (!saveServerBankBalance(getBalance() + amount, getBalance(), conn)) {
+                return false;
+            }
+    
+            conn.commit(); // Confirmar la transacción
+            return true;
+    
+        } catch (SQLException e) {
+            playerData.setBalance(playerBalance + amount);
+            playerData.save();
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean setServerBankBalance(double newBalance) {
+        try (Connection conn = database.connect()) {
+            return saveServerBankBalance(newBalance, getBalance(), conn);
         } catch (SQLException e) {
             e.printStackTrace();
-            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, getMsg("transactions.error").replace("%action%","Modify bank balance"));
+            return false;
         }
     }
-
-    public void setup(double amount) {
-
-        if (amount < 0) {
-            plugin.getServer().getLogger().warning("Cant setup a negative balance");
-            return; 
-        }
     
-        // Conectar a la base de datos
-        try (Connection conn = database.connect()) {
-            // Consulta SQL para actualizar el balance en la tabla 'serverbank'
-            String updateSql = "UPDATE serverbank SET balance = ?";
-    
-            try (PreparedStatement stmt = conn.prepareStatement(updateSql)) {
-                // Establecer el nuevo balance
-                stmt.setDouble(1, amount); 
-    
-                // Ejecutar la actualización
-                int rowsUpdated = stmt.executeUpdate();
-    
-                // Verificar si se actualizó alguna fila
-                if (rowsUpdated > 0) {
-                    plugin.getServer().getLogger().info("You have been setup the economy to " + amount);
-                } else {
-                    plugin.getServer().getLogger().warning("An error occurred while updating the database");
-                }
-            }
+    private boolean saveServerBankBalance(double newBalance, double oldBalance, Connection conn) throws SQLException {
+        String sql = "UPDATE serverbank SET balance = ? WHERE balance = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, newBalance);
+            stmt.setDouble(2, oldBalance);
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
         } catch (SQLException e) {
-            e.printStackTrace(); // Imprimir traza de error en caso de fallo
+            conn.rollback();
+            throw e;
         }
     }
 }

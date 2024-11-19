@@ -2,7 +2,20 @@
 #Besides that, each player can have their own language messages that has the Minecraft client.
 #If no language is found for a player in lang folder, en.yml will be used.
 
-server_language: "en"
+#Dont modifed the initial_server_bank_balance once has been set, it will be used to calculate inflation and deflation.
+#To reset the server balance o change it, modify and then remove the database.
 
+#database: sqlite, mysql
+data_mode: "sqlite"
+mysql:
+  url: "host:port/database_name"
+  username: "yourUsername"
+  password: "yourPassword"
+
+initial_server_bank_balance: 1000000000.0
+
+server_language: "en"
 currency_name_singular: "Dollar"
 currency_name_plural: "Dollars"
+
+

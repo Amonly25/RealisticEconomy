@@ -10,10 +10,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
-public class LangHandler {
+public class LangManager {
 
     private RealisticEconomy plugin;
-    public LangHandler(RealisticEconomy plugin) {
+    public LangManager(RealisticEconomy plugin) {
         this.plugin = plugin;
 
         // Save default lang file from resources if it doesn't exist
@@ -79,6 +79,6 @@ public class LangHandler {
             return result.toString().trim();
         }
 
-        return lang.getString(path,"Undefined");
+        return lang.getString(path,"Undefined key: " + path);
     }
 }

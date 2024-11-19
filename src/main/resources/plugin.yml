@@ -3,7 +3,7 @@ name: RealisticEconomy
 api-version: 1.21
 version: 1
 author: AMONLY
-depend: [Vault]
+soft-depend: [Vault]
 commands:
   eco:
     description: Main command for RealisticEconomy
