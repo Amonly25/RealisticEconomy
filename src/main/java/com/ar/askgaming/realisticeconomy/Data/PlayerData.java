@@ -1,11 +1,11 @@
-package com.ar.askgaming.realisticeconomy;
+package com.ar.askgaming.realisticeconomy.Data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import com.ar.askgaming.realisticeconomy.datas.DatabaseManager;
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class PlayerData {
 

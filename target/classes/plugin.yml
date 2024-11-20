@@ -10,6 +10,22 @@ commands:
     usage: /eco <subcommand>
     aliases: [economy]
     permission: eco.user
+  bank:
+    description: Main command for RealisticEconomy bank
+    usage: /bank <subcommand>
+    permission: eco.user
+  lotery:
+    description: Main command for RealisticEconomy lotery
+    usage: /lotery <subcommand>
+    permission: eco.user
+  reauction:
+    description: Main command for RealisticEconomy reauction
+    usage: /reauction <subcommand>
+    permission: eco.user
+  tokens:
+    description: Main command for RealisticEconomy tokens
+    usage: /tokens <subcommand>
+    permission: eco.user
 permissions:
   eco.admin:
     description: Allows access to all RealisticEconomy commands

@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy;
+package com.ar.askgaming.realisticeconomy.Commands;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,17 +12,20 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-public class Commands implements TabExecutor{
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
+import com.ar.askgaming.realisticeconomy.Data.PlayerData;
+
+public class EcoCommands implements TabExecutor{
 
     private final RealisticEconomy plugin;
-    public Commands(RealisticEconomy main) {
+    public EcoCommands(RealisticEconomy main) {
         plugin = main;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 
-        return List.of("balance","add","take","pay","server","top","set");
+        return List.of("balance","add","take","pay","server","top");
     }
 
     @Override

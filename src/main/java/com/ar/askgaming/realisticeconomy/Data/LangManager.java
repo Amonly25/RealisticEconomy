@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy.datas;
+package com.ar.askgaming.realisticeconomy.Data;
 
 import java.io.File;
 import java.io.IOException;

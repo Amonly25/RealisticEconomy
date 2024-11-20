@@ -7,12 +7,19 @@ import org.bukkit.block.Vault;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.ar.askgaming.realisticeconomy.datas.DatabaseManager;
-import com.ar.askgaming.realisticeconomy.datas.LangManager;
-import com.ar.askgaming.realisticeconomy.listeners.PlayerJoinListener;
-import com.ar.askgaming.realisticeconomy.utils.EconomyLogger;
-import com.ar.askgaming.realisticeconomy.utils.UtilityMethods;
-import com.ar.askgaming.realisticeconomy.utils.VaultHook;
+import com.ar.askgaming.realisticeconomy.Commands.AuctionCommands;
+import com.ar.askgaming.realisticeconomy.Commands.BankCommands;
+import com.ar.askgaming.realisticeconomy.Commands.EcoCommands;
+import com.ar.askgaming.realisticeconomy.Commands.LoteryCommands;
+import com.ar.askgaming.realisticeconomy.Commands.TokenCommands;
+import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
+import com.ar.askgaming.realisticeconomy.Data.LangManager;
+import com.ar.askgaming.realisticeconomy.Economy.BankTransactions;
+import com.ar.askgaming.realisticeconomy.Economy.EconomyLogger;
+import com.ar.askgaming.realisticeconomy.Economy.EconomyTransactions;
+import com.ar.askgaming.realisticeconomy.Listeners.PlayerJoinListener;
+import com.ar.askgaming.realisticeconomy.Utilities.UtilityMethods;
+import com.ar.askgaming.realisticeconomy.Utilities.VaultHook;
 
 import net.milkbowl.vault.economy.Economy;
 
@@ -21,9 +28,9 @@ public class RealisticEconomy extends JavaPlugin{
     private String serverLang;
 
     private EconomyTransactions economyService;
-    private ServerBank serverBank;
+    private BankTransactions serverBank;
     private UtilityMethods utilityMethods;
-    private com.ar.askgaming.realisticeconomy.Economy economy;
+    private com.ar.askgaming.realisticeconomy.Economy.Economy economy;
 
     private DatabaseManager database;
     private LangManager langHandler;
@@ -46,9 +53,9 @@ public class RealisticEconomy extends JavaPlugin{
         }
         
         langHandler = new LangManager(this);
-        economy = new com.ar.askgaming.realisticeconomy.Economy(this);
+        economy = new com.ar.askgaming.realisticeconomy.Economy.Economy(this);
         economyService = new EconomyTransactions(this);
-        serverBank = new ServerBank(this);
+        serverBank = new BankTransactions(this);
 
         serverLang = getConfig().getString("server_lang", "en");
         economyLogger = new EconomyLogger(this);
@@ -58,7 +65,11 @@ public class RealisticEconomy extends JavaPlugin{
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
-        getServer().getPluginCommand("eco").setExecutor(new Commands(this));
+        getServer().getPluginCommand("eco").setExecutor(new EcoCommands(this));
+        getServer().getPluginCommand("bank").setExecutor(new BankCommands(this));
+        getServer().getPluginCommand("lotery").setExecutor(new LoteryCommands(this));
+        getServer().getPluginCommand("reauction").setExecutor(new AuctionCommands(this));
+        getServer().getPluginCommand("tokens").setExecutor(new TokenCommands(this));
 
         if (setupVault()) {
             getLogger().info("EconomyPlugin found and hooked into Vault.");
@@ -75,7 +86,7 @@ public class RealisticEconomy extends JavaPlugin{
     public EconomyTransactions getEconomyService() {
         return economyService;
     }
-    public ServerBank getServerBank() {
+    public BankTransactions getServerBank() {
         return serverBank;
     }
     public DatabaseManager getDatabase() {
@@ -100,7 +111,7 @@ public class RealisticEconomy extends JavaPlugin{
     public UtilityMethods getUtilityMethods() {
         return utilityMethods;
     }
-    public com.ar.askgaming.realisticeconomy.Economy getEconomy() {
+    public com.ar.askgaming.realisticeconomy.Economy.Economy getEconomy() {
         return economy;
     }
 

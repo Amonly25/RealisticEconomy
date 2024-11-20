@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy.listeners;
+package com.ar.askgaming.realisticeconomy.Listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

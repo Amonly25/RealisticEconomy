@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy;
+package com.ar.askgaming.realisticeconomy.Economy;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,20 +6,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import com.ar.askgaming.realisticeconomy.datas.DatabaseManager;
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
+import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
+import com.ar.askgaming.realisticeconomy.Data.PlayerData;
 
-public class ServerBank {
+public class BankTransactions {
 
     private DatabaseManager database;
     private RealisticEconomy plugin;
 
-    public ServerBank(RealisticEconomy main) {
+    public BankTransactions(RealisticEconomy main) {
         plugin = main;
         database = plugin.getDatabase();
-    }
-
-    private void log(String key){
-        plugin.getEconomyLogger().log(key);
     }
 
     public double getBalance() {

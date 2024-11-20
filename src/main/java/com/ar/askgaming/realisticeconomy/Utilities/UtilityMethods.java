@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy.utils;
+package com.ar.askgaming.realisticeconomy.Utilities;
 
 import java.util.List;
 import java.util.UUID;

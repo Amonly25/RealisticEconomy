@@ -13,9 +13,9 @@ mysql:
   password: "yourPassword"
 
 initial_server_bank_balance: 1000000000.0
+debt_limit: 10000.0
+loan_interest_per_day: 0.1666
+savings_interest_per_day: 0.0833
 
-server_language: "en"
-currency_name_singular: "Dollar"
-currency_name_plural: "Dollars"
 
 

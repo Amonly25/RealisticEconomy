@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy.datas;
+package com.ar.askgaming.realisticeconomy.Data;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.ar.askgaming.realisticeconomy.PlayerData;
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class DatabaseManager {

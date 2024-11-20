@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy.utils;
+package com.ar.askgaming.realisticeconomy.Economy;
 
 import java.io.BufferedWriter;
 import java.io.File;
