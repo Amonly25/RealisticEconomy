@@ -14,40 +14,44 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
+import com.ar.askgaming.realisticeconomy.Data.LangManager;
 
 public class LoteryManager {
     
     private RealisticEconomy plugin;
-    private File LoteryFile;
-    private FileConfiguration LoteryConfig;
+    private File loteryFile;
+    private FileConfiguration loteryConfig;
+    private boolean maintenance = false;
+
     public LoteryManager(RealisticEconomy main) {
         plugin = main;
 
-        LoteryFile = new File(plugin.getDataFolder(), "lotery.yml");
-        if (!LoteryFile.exists()) {
+        loteryFile = new File(plugin.getDataFolder(), "lotery.yml");
+        if (!loteryFile.exists()) {
             plugin.saveResource("lotery.yml", false);
         }
 
-        LoteryConfig = new YamlConfiguration();
+        loteryConfig = new YamlConfiguration();
         try {
-            LoteryConfig.load(LoteryFile);
+            loteryConfig.load(loteryFile);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // Obtener todas las claves del nivel raíz
-        Set<String> keys = LoteryConfig.getKeys(false);
 
-        // Iterar sobre todas las keys y cargar cada Protection
+        // Obtener todas las claves del nivel raíz
+        Set<String> keys = loteryConfig.getKeys(false);
+
+        // Iterar sobre todas las keys y cargar cada loteria
         for (String key : keys) {
-            Object obj = LoteryConfig.get(key);
+            Object obj = loteryConfig.get(key);
             if (obj instanceof Lotery) {
                 Lotery protection = (Lotery) obj;
 
-                // Guardar cada Protection en el mapa con su clave
                 loteryList.put(key, protection);
             }
         }
     }
+    private LangManager lang = plugin.getLang();
 
     private HashMap<String, Lotery> loteryList = new HashMap<>();
 
@@ -56,54 +60,31 @@ public class LoteryManager {
 
         loteryList.put(name, lotery);
 
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendMessage("A new lotery has been created: " + name);
-
-        }
-        
+        lang.broadcastTranslated("lottery.created","{name}", name);
+          
     }
     public void drawLotery(String name) {
-        Lotery lotery = null;
+        Lotery lotery = loteryList.get(name);
+        if (lotery == null || !lotery.isActive()) return;
 
-        if (loteryList.containsKey(name)) {
-            lotery = loteryList.get(name);
-        } else return;
+        lotery.setActive(false);
+        int winningNumber = (int) (Math.random() * lotery.getNumberLimit()) + 1;
+        lotery.setWinningNumber(winningNumber);
 
-        if (lotery.isActive()) {
-            lotery.setActive(false);
-
-            int winningNumber = (int) (Math.random() * lotery.getNumberLimit()) + 1;
-            lotery.setWinningNumber(winningNumber);
-
-            List<UUID> winners = getWinners(lotery);
-            boolean hasWinners = winners.size() > 0;
-
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                p.sendMessage("The lotery has been drawn: " + name);
-                p.sendMessage("The winning number is: " + winningNumber);
-
-            }
-            if (hasWinners){
-                double prize = lotery.getJackpot() / winners.size();
-                List<String> winnersNames = new ArrayList<>();
-                for (UUID winner : winners) {
-
-                    OfflinePlayer player = Bukkit.getOfflinePlayer(winner);
-                    plugin.getEconomyService().depositPlayer(winner, prize);
-                    winnersNames.add(player.getName());
-                    
-                }
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    
-                    p.sendMessage("The winners are: " + winners.toString() + ", hey have been awarded: " + prize);
-                }
-            } else {
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    p.sendMessage("There are no winners this time.");
-                    p.sendMessage("The jackpot will be remain to the next lotery: " + lotery.getJackpot());
-                }
-            }
+        List<UUID> winners = getWinners(lotery);
+        boolean hasWinners = !winners.isEmpty();
+        double prize = hasWinners ? lotery.getJackpot() / winners.size() : 0;
+        lotery.setJackpot(0);
+        saveConfig();
+        lang.broadcastTranslated("lottery.drawn","{name}", name);
+        lang.broadcastTranslated("lottery.number","{number}", String.valueOf(winningNumber));
+       
+        if (hasWinners) {
+            processWinners(name, prize, winners);
+        } else {
+            lang.broadcastTranslated("lottery.no_winners","{none}", "");
         }
+        
     }
     private List<UUID> getWinners(Lotery lotery){
         List<UUID> winners = new ArrayList<>();
@@ -120,50 +101,97 @@ public class LoteryManager {
 
         return winners;
     }
-    public void buyTicket(Player p, String name, int number) {
-        Lotery lotery = null;
+    // Process the winners and distribute the prize
+    private void processWinners(String name, double prize, List<UUID> winners) {
+        for (UUID winner : winners) {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(winner);
+            boolean deposit = plugin.getEconomyService().depositPlayer(winner, prize);
+            double taxes = prize * 0.1;
+            boolean taken = plugin.getServerBank().depositFromPlayerToServer(winner, taxes);
 
-        if (loteryList.containsKey(name)) {
-            lotery = loteryList.get(name);
-        } else return;
+            //Verificar la transacción
 
-        if (lotery.isActive()) {
+            if (player.isOnline()) {
+                Player onlinePlayer = player.getPlayer();
+                if (onlinePlayer != null) {
+                    onlinePlayer.sendMessage(lang.getFrom("lottery.won", String.valueOf(prize)));
+                    onlinePlayer.sendMessage(lang.getFrom("lottery.taxes", String.valueOf(taxes)));
 
-            if (number > lotery.getNumberLimit() || number < 1) {
-                p.sendMessage("Invalid number, the number must be between 1 and " + lotery.getNumberLimit());
-                return;
-            }
-            if (plugin.getEconomyService().getBalance(p.getUniqueId()) < lotery.getTicketPrice()) {
-                p.sendMessage("You don't have enough money to buy a ticket.");
-                return;
-            }
-            if (plugin.getEconomyService().withdrawPlayer(p.getUniqueId(), lotery.getTicketPrice())){
-
-                lotery.addTicket(p.getUniqueId(), number);
-                p.sendMessage("You have bought a ticket for the lotery: " + name);
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    player.sendMessage(p.getName() + " has bought a ticket for the lotery: " + name);
                 }
-            } else {
-                p.sendMessage("An error occurred while buying the ticket, you have money?");
             }
+        }
+        lang.broadcastTranslated("lottery.winners","{list}", winners.toString());
+        lang.broadcastTranslated("lottery.reward","{amount}", String.valueOf(prize));
 
+    }
+    // Buy a ticket for the lottery
+    public void buyTicket(Player p, String name, int number) {
+        Lotery lotery = loteryList.get(name);
+        if (lotery == null || !lotery.isActive()) {
+            p.sendMessage(lang.getFrom("lottery.no_active", p.getLocale()));
+            return;
+        }
+        if (number < 1 || number > lotery.getNumberLimit()) {
+            p.sendMessage(lang.getFrom("lottery.number_limit", p.getLocale()).replace("{number}", String.valueOf(lotery.getNumberLimit())));
+            return;
+        }
+        if (plugin.getEconomyService().getBalance(p.getUniqueId()) < lotery.getTicketPrice()) {
+            p.sendMessage(lang.getFrom("error.not_enough", p.getLocale()));
+            return;
+        }
+        if (plugin.getEconomyService().withdrawPlayer(p.getUniqueId(), lotery.getTicketPrice())) {
+            lotery.addTicket(p.getUniqueId(), number);
+            p.sendMessage(lang.getFrom("lottery.buy", p.getLocale()).replace("{number}", String.valueOf(number)));
+            lang.broadcastTranslated("lottery.player_buy", "{name}", name);
         } else {
-            p.sendMessage("The lotery is not active.");
+            p.sendMessage(lang.getFrom("error.transaction", p.getLocale()));
         }
     }
+    // Get information about a specific lottery
     public void getLoteryInfo(Player p, String name) {
-        Lotery lotery = null;
+        Lotery lotery = loteryList.get(name);
+        if (lotery == null) return;
 
+        p.sendMessage(lang.getFrom("lottery.info.name", p.getLocale()).replace("{name}", name));
+        p.sendMessage(lang.getFrom("lottery.info.ticket_price", p.getLocale()).replace("{price}", String.valueOf(lotery.getTicketPrice())));
+        p.sendMessage(lang.getFrom("lottery.info.number_limit", p.getLocale()).replace("{limit}", String.valueOf(lotery.getNumberLimit())));
+        p.sendMessage(lang.getFrom("lottery.info.tickets_sold", p.getLocale()).replace("{sold}", String.valueOf(lotery.getTicketsSold())));
+        p.sendMessage(lang.getFrom("lottery.info.jackpot", p.getLocale()).replace("{jackpot}", String.valueOf(lotery.getJackpot())));
+        p.sendMessage(lang.getFrom("lottery.info.active", p.getLocale()).replace("{active}", String.valueOf(lotery.isActive())));
+
+    }
+    // Delete a lottery
+    public void deleteLotery(String name) {
         if (loteryList.containsKey(name)) {
-            lotery = loteryList.get(name);
-        } else return;
+            loteryList.remove(name);
+            loteryConfig.set(name, null);
+            saveConfig();
+            lang.broadcastTranslated("lottery.remove", "{name}", name);
+        }
+    }
 
-        p.sendMessage("Lotery: " + name);
-        p.sendMessage("Ticket price: " + lotery.getTicketPrice());
-        p.sendMessage("Number limit: " + lotery.getNumberLimit());
-        p.sendMessage("Tickets sold: " + lotery.getTicketsSold());
-        p.sendMessage("Jackpot: " + lotery.getJackpot());
-        p.sendMessage("Active: " + lotery.isActive());
+    // Reset a lottery
+    public void resetLotery(String name) {
+        Lotery lotery = loteryList.get(name);
+        if (lotery != null) {
+            lotery.reset();
+            lang.broadcastTranslated("lottery.reset", "{name}", name);
+            saveConfig();
+        }
+    }
+
+    // Save the lottery configuration file
+    private void saveConfig() {
+        try {
+            loteryConfig.save(loteryFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public boolean isMaintenance() {
+        return maintenance;
+    }
+    public void setMaintenance(boolean maintenance) {
+        this.maintenance = maintenance;
     }
 }

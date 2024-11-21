@@ -31,3 +31,11 @@ Api Usage
     }
 
 Then you can get all Methods availables
+
+
+Vault methods supported
+    depositPlayer(OfflinePlayer arg0, double arg1)
+    getBalance(OfflinePlayer arg0)
+    has(OfflinePlayer arg0, double arg1)
+    hasAccount(OfflinePlayer arg0)
+    withdrawPlayer(OfflinePlayer arg0, double arg1)

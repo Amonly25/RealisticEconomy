@@ -97,32 +97,31 @@ public class BankCommands implements TabExecutor{
     }
     //#region info
     private void showBankInfo(Player p, PlayerData pd) {
-        p.sendMessage("Inflacion: " + plugin.getEconomy().getInflation() + "%");
-        p.sendMessage("Tasa de interes: " + plugin.getEconomy().getLoanInterest() + "%");
-        p.sendMessage("Tasa de interes de Ahorro: " + plugin.getEconomy().getSavingsInterest() + "%");
+        p.sendMessage(plugin.getLang().getFrom("bank.info.inflation", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomy().getInflation())));
+        p.sendMessage(plugin.getLang().getFrom("bank.info.interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomy().getLoanInterest())));
+        p.sendMessage(plugin.getLang().getFrom("bank.info.savings_interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomy().getSavingsInterest())));
         p.sendMessage("");
-    
         double savingsInterest = pd.getBalance() * plugin.getEconomy().getSavingsInterest() / 100;
-        p.sendMessage("Bank balance: " + pd.getBankBalance() + " (Generas " + savingsInterest + " de interes por dia)");
-    
+        p.sendMessage(plugin.getLang().getFrom("bank.info.balance", p.getLocale()).replace("{value}", String.valueOf(pd.getBankBalance())).replace("{interest}", String.valueOf(savingsInterest)));
         double loanInterest = pd.getDebt() * plugin.getEconomy().getLoanInterest() / 100;
         String extra = pd.getDebt() > 0 ? " (Acumula " + loanInterest + " de interes por dia)" : "";
-        p.sendMessage("Deuda: " + pd.getDebt() + extra);
+        p.sendMessage(plugin.getLang().getFrom("bank.info.debt", p.getLocale()).replace("{value}", String.valueOf(pd.getDebt())).replace("{interest}", extra));
+
     }
     //#region loan
     private void takeLoan(Player p, PlayerData pd, double amount) {
         if (amount <= 0) {
-            p.sendMessage("§cInvalid amount");
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
         }
         if (pd.getDebt() >= plugin.getEconomy().getDebtLimit()) {
-            p.sendMessage("§cYou can't take more debt");
+            p.sendMessage(plugin.getLang().getFrom("bank.debt_limit", p.getLocale()));
             return;
         }
         if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), amount)) {
             pd.setDebt(pd.getDebt() + amount);
             pd.save();
-            p.sendMessage("§aYou took a loan of " + amount);
+            p.sendMessage(plugin.getLang().getFrom("bank.loan", p.getLocale()).replace("{amount}", String.valueOf(amount)));
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
         }
@@ -130,13 +129,13 @@ public class BankCommands implements TabExecutor{
     //#region pay
     private void payDebt(Player p, PlayerData pd, double amount) {
         if (amount <= 0 || amount > pd.getBalance() || amount > pd.getDebt()) {
-            p.sendMessage("§cInvalid amount");
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
         }
         if (plugin.getServerBank().depositFromPlayerToServer(p.getUniqueId(), amount)) {
             pd.setDebt(pd.getDebt() - amount);
             pd.save();
-            p.sendMessage("§aYou paid " + amount + " of your debt");
+            p.sendMessage(plugin.getLang().getFrom("bank.pay_debt", p.getLocale()).replace("{amount}", String.valueOf(amount)));
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
         }
@@ -144,11 +143,11 @@ public class BankCommands implements TabExecutor{
     //#region deposit
     private void depositToBank(Player p, PlayerData pd, double amount) {
         if (amount <= 0 || amount > pd.getBalance()) {
-            p.sendMessage("§cInvalid amount");
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
         }
         if (plugin.getEconomyService().depositToPlayerBank(p.getUniqueId(), amount)) {
-            p.sendMessage("§aYou deposited " + amount + " to your bank account");
+            p.sendMessage(plugin.getLang().getFrom("bank.deposit", p.getLocale()).replace("{amount}", String.valueOf(amount)));
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
         }
@@ -156,11 +155,11 @@ public class BankCommands implements TabExecutor{
     //#region withdraw
     private void withdrawFromBank(Player p, PlayerData pd, double amount) {
         if (amount <= 0 || amount > pd.getBankBalance()) {
-            p.sendMessage("§cInvalid amount");
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
         }
         if (plugin.getEconomyService().withdrawFromPlayerBank(p.getUniqueId(), amount)) {
-            p.sendMessage("§aYou withdrew " + amount + " from your bank account");
+            p.sendMessage(plugin.getLang().getFrom("bank.withdraw", p.getLocale()).replace("{amount}", String.valueOf(amount)));
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
         }

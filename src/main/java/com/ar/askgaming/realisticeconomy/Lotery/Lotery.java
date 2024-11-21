@@ -115,4 +115,10 @@ public class Lotery implements ConfigurationSerializable{
         map.put("tickets", tickets);
         return map;
     }
+    public void reset(){
+        tickets.clear();
+        ticketsSold = 0;
+        winningNumber = 0;
+        isActive = true;
+    }
 }

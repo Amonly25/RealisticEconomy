@@ -1,10 +1,10 @@
-balance: "Your balance is %balance%: "
-bank_balance: "Bank balance is %balance%: "
-debt: "You owe %amount% to the bank!"
-tokens: "You have %amount% tokens!"
+balance: "Your balance is {balance}: "
+bank_balance: "Bank balance is {balance}: "
+debt: "You owe {amount} to the bank!"
+tokens: "You have {amount} tokens!"
 
-balance_other: "Player %player% has %balance%: "
-server_balance: "Server balance is %balance%: "
+balance_other: "Player {player} has {balance}: "
+server_balance: "Server balance is {balance}: "
 
 economy:
     add_player: "&aHas been added %amount% to %player% from server bank!"
@@ -14,10 +14,52 @@ economy:
     set_player: "&aPlayer %player% balance was set to %amount%!"
     set_player_notify: "&aYour balance was set to %amount%!"
 
+bank:
+    deposit: "You have deposited {amount} to the bank!"
+    withdraw: "You have withdrawn {amount} from the bank!"
+    pay_debt : "You have paid {amount} to the bank!"
+    debt_limit: "You can't take more money from the bank!"
+    loan: "You have taken a loan of {amount} from the bank!"
+    info:
+        inflation: "Inflation: {inflation}%"
+        interest: "Interest: {interest}%"
+        savings_interest: "Savings interest: {interest}%"
+        balance: "Bank balance: {balance} - {interest}"
+        debt: "Debt: {debt} - {interest}"
+
+
+token:
+    pay: "You paid {amount} tokens to {player}."
+    receive: "{player} has paid you {amount} tokens."
+
+lottery:
+    create: "&aLottery {name} has been created!"
+    remove: "&cLottery {name} has been removed!"   
+    drawn: "&aThe Lottery {name} has been drawn!"
+    number: "&aThe number is: {number}!"
+    no_winners: "&cThere is no winner this time!"
+    winners: "&aThe winners are: {list}!"
+    reward: "&aThe reward is: {amount}!"
+    won: "&aYou have won {amount}!"
+    taxes: "&cYou have to pay taxes: {taxes}!"
+    no_active: "&cThis lottery is not active!"
+    number_limit: "&cThe number must be between 1 and {number}"
+    buy: "&aYou have bought a ticker for number {number}"
+    player_buy: "&aA player has bought a ticker for lottery {name}"
+    reset: "&aThe lottery has been reset, you can buy tickets again!"
+    info:
+        name: "Name: {name}"
+        jackpot: "Jackpot: {jackpot}"
+        ticket_price: "Price: {price}"
+        number_limit: "Numbers: {numbers}"
+        tickets_sold: "Tickets sold: {sold}"
+        active: "Active: {active}"
+
 error:
     player_not_found: "&cPlayer not found!"
     transaction: "&cError in the transaction, try again later or check the balance."
     invalid_amount: "&cInvalid amount!"
+    not_enough: "&cYou don't have enough money!"
 
 transactions:
     pay: "You paid %amount% to %player%."

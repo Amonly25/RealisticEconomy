@@ -200,9 +200,9 @@ public class EcoCommands implements TabExecutor{
 
         if (args.length == 3){
             if (!warn.contains(p)){
-                p.sendMessage("Warning: This command will set the balance of the player without bank transaction.");
-                p.sendMessage("This action can disturb the economy of the server, use with caution.");
-                p.sendMessage("If you are sure, use the command again.");
+                p.sendMessage("§cWarning: This command will set the balance of the player without bank transaction.");
+                p.sendMessage("§cThis action can disturb the economy of the server, use with caution.");
+                p.sendMessage("§cIf you are sure, use the command again.");
                 warn.add(p);
                 return;
             }

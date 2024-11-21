@@ -7,6 +7,8 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.ar.askgaming.realisticeconomy.Auction.Auction;
+import com.ar.askgaming.realisticeconomy.Auction.AuctionManager;
 import com.ar.askgaming.realisticeconomy.Commands.AuctionCommands;
 import com.ar.askgaming.realisticeconomy.Commands.BankCommands;
 import com.ar.askgaming.realisticeconomy.Commands.EcoCommands;
@@ -33,7 +35,7 @@ public class RealisticEconomy extends JavaPlugin{
     private BankTransactions serverBank;
     private UtilityMethods utilityMethods;
     private LoteryManager loteryManager;
-
+    private AuctionManager auctionManager;
     private com.ar.askgaming.realisticeconomy.Economy.Economy economy;
 
     private DatabaseManager database;
@@ -48,6 +50,7 @@ public class RealisticEconomy extends JavaPlugin{
         database = new DatabaseManager(this);
 
         ConfigurationSerialization.registerClass(Lotery.class,"Lotery");
+        ConfigurationSerialization.registerClass(Auction.class,"Auction");
 
         try (Connection conn = database.connect()) {
             getLogger().info("Connected to database.");
@@ -63,6 +66,7 @@ public class RealisticEconomy extends JavaPlugin{
         economyService = new EconomyTransactions(this);
         serverBank = new BankTransactions(this);
         loteryManager = new LoteryManager(this);
+        auctionManager = new AuctionManager(this);
 
         serverLang = getConfig().getString("server_lang", "en");
         economyLogger = new EconomyLogger(this);
@@ -89,7 +93,13 @@ public class RealisticEconomy extends JavaPlugin{
     public void onDisable() {
         //sqlDatabase.close();
     }
-
+    private boolean setupVault() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        getServer().getServicesManager().register(Economy.class, vaultHook, this, ServicePriority.Normal);
+        return true;
+    }
     public EconomyTransactions getEconomyService() {
         return economyService;
     }
@@ -108,13 +118,6 @@ public class RealisticEconomy extends JavaPlugin{
     public EconomyLogger getEconomyLogger() {
         return economyLogger;
     }
-    private boolean setupVault() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        getServer().getServicesManager().register(Economy.class, vaultHook, this, ServicePriority.Normal);
-        return true;
-    }
     public UtilityMethods getUtilityMethods() {
         return utilityMethods;
     }
@@ -123,6 +126,9 @@ public class RealisticEconomy extends JavaPlugin{
     }
     public LoteryManager getLoteryManager() {
         return loteryManager;
+    }
+    public AuctionManager getAuctionManager() {
+        return auctionManager;
     }
 
 }

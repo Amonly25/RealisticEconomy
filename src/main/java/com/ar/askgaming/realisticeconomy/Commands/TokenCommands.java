@@ -43,7 +43,7 @@ public class TokenCommands implements TabExecutor{
         
         switch (args[0].toLowerCase()) {
             case "balance":
-                p.sendMessage("Token balance: " + pd.getTokens());
+                p.sendMessage(plugin.getLang().getFrom("tokens", p.getLocale()).replace("{amount}", String.valueOf(pd.getTokens())));
                 break;
             case "pay":
                 if (args.length < 3) {
@@ -64,31 +64,32 @@ public class TokenCommands implements TabExecutor{
     private void pay(Player p, String[] args){
         Player target = plugin.getServer().getPlayer(args[1]);
         if (target == null){
-            p.sendMessage("§cPlayer not found");
+            p.sendMessage(plugin.getLang().getFrom("error.player_not_found",p.getLocale()));
             return;
         }
         int amount;
         try {
             amount = Integer.parseInt(args[2]);
         } catch (Exception e) {
-            p.sendMessage("§cInvalid amount");
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount",p.getLocale()));
             return;
         }
         if (amount <= 0){
-            p.sendMessage("§cInvalid amount");
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount",p.getLocale()));
             return;
         }
         PlayerData pd = plugin.getDatabase().loadPlayerData(p.getUniqueId());
         if (amount >= pd.getTokens()){
-            p.sendMessage("§cYou don't have enough tokens");
+            p.sendMessage(plugin.getLang().getFrom("error.not_enough",p.getLocale()));
             return;
         }
 
         if (plugin.getEconomyService().playerPayTokenToPlayer(p.getUniqueId(), target.getUniqueId(), amount)){
-            p.sendMessage("§aPayment successful");
-            target.sendMessage("§aYou received " + amount + " tokens from " + p.getName());
+
+            p.sendMessage(plugin.getLang().getFrom("token.pay", p.getLocale()).replace("{player}", target.getName()).replace("{amount}", String.valueOf(amount)));
+            target.sendMessage(plugin.getLang().getFrom("token.receive", p.getLocale()).replace("{player}", p.getName()).replace("{amount}", String.valueOf(amount)));
         } else {
-            p.sendMessage("§cPayment failed");
+            p.sendMessage(plugin.getLang().getFrom("error.transaction",p.getLocale()));
         }
 
     }

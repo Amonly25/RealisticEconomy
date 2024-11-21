@@ -19,7 +19,7 @@ public class LoteryCommands implements TabExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
-            return List.of("buy", "info");
+            return List.of("buy", "info", "draw", "create", "reset", "delete");
         } else return null;
     }
 
@@ -34,6 +34,13 @@ public class LoteryCommands implements TabExecutor {
            return true;
        }
        Player player = (Player) sender;
+
+       if (plugin.getLoteryManager().isMaintenance()) {
+           player.sendMessage("§cLotery is in maintenance mode.");
+           return true;
+       }
+
+
        switch (args[0].toLowerCase()) {
             case "buy":
                 if (args.length < 3) {
@@ -51,6 +58,24 @@ public class LoteryCommands implements TabExecutor {
                 // Buy ticket
                 plugin.getLoteryManager().buyTicket(player, loteryName, number);
 
+                break;
+            case "reset":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /lotery reset <lotery_name>");
+                    return true;
+                }
+                String loteryName4 = args[1];
+                // Reset lotery
+                plugin.getLoteryManager().resetLotery(loteryName4);
+                break;
+            case "delete":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /lotery delete <lotery_name>");
+                    return true;
+                }
+                String loteryName5 = args[1];
+                // Delete lotery
+                plugin.getLoteryManager().deleteLotery(loteryName5);
                 break;
             case "create":
                 if (args.length < 3) {

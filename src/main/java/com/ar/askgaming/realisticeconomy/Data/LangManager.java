@@ -3,6 +3,7 @@ package com.ar.askgaming.realisticeconomy.Data;
 import java.io.File;
 import java.io.IOException;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -80,5 +81,13 @@ public class LangManager {
         }
 
         return lang.getString(path,"Undefined key: " + path);
+    }
+
+    public void broadcastTranslated(String path, String replace, String replacement) {
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            
+            player.sendMessage(getFrom(path, player.getLocale()).replace(replace, replacement));
+
+        });
     }
 }

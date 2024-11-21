@@ -1,7 +1,6 @@
 package com.ar.askgaming.realisticeconomy.Utilities;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
@@ -20,14 +19,14 @@ public class UtilityMethods {
             try {
                 page = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                p.sendMessage("Error, invalid numer");
+                p.sendMessage(plugin.getLang().getFrom("error.invalid_amount",p.getLocale()));
                 return;
             }
         }
 
         int totalPages = (int) Math.ceil(list.size() / 10.0);
         if (page > totalPages || page < 1) {
-            p.sendMessage("Pagina invalida");
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
         }
 

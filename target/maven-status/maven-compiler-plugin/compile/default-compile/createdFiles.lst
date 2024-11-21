@@ -16,5 +16,6 @@ com\ar\askgaming\realisticeconomy\Economy\Economy.class
 com\ar\askgaming\realisticeconomy\Economy\BankTransactions.class
 com\ar\askgaming\realisticeconomy\Commands\LoteryCommands.class
 com\ar\askgaming\realisticeconomy\Data\LangManager.class
+com\ar\askgaming\realisticeconomy\Auction\AuctionManager.class
 com\ar\askgaming\realisticeconomy\Data\PlayerData.class
 com\ar\askgaming\realisticeconomy\Economy\EconomyLogger.class
