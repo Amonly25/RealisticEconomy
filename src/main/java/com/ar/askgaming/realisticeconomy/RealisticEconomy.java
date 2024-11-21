@@ -3,7 +3,7 @@ package com.ar.askgaming.realisticeconomy;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.bukkit.block.Vault;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,6 +18,8 @@ import com.ar.askgaming.realisticeconomy.Economy.BankTransactions;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyLogger;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyTransactions;
 import com.ar.askgaming.realisticeconomy.Listeners.PlayerJoinListener;
+import com.ar.askgaming.realisticeconomy.Lotery.Lotery;
+import com.ar.askgaming.realisticeconomy.Lotery.LoteryManager;
 import com.ar.askgaming.realisticeconomy.Utilities.UtilityMethods;
 import com.ar.askgaming.realisticeconomy.Utilities.VaultHook;
 
@@ -30,6 +32,8 @@ public class RealisticEconomy extends JavaPlugin{
     private EconomyTransactions economyService;
     private BankTransactions serverBank;
     private UtilityMethods utilityMethods;
+    private LoteryManager loteryManager;
+
     private com.ar.askgaming.realisticeconomy.Economy.Economy economy;
 
     private DatabaseManager database;
@@ -42,6 +46,8 @@ public class RealisticEconomy extends JavaPlugin{
         saveDefaultConfig();
 
         database = new DatabaseManager(this);
+
+        ConfigurationSerialization.registerClass(Lotery.class,"Lotery");
 
         try (Connection conn = database.connect()) {
             getLogger().info("Connected to database.");
@@ -56,6 +62,7 @@ public class RealisticEconomy extends JavaPlugin{
         economy = new com.ar.askgaming.realisticeconomy.Economy.Economy(this);
         economyService = new EconomyTransactions(this);
         serverBank = new BankTransactions(this);
+        loteryManager = new LoteryManager(this);
 
         serverLang = getConfig().getString("server_lang", "en");
         economyLogger = new EconomyLogger(this);
@@ -113,6 +120,9 @@ public class RealisticEconomy extends JavaPlugin{
     }
     public com.ar.askgaming.realisticeconomy.Economy.Economy getEconomy() {
         return economy;
+    }
+    public LoteryManager getLoteryManager() {
+        return loteryManager;
     }
 
 }
