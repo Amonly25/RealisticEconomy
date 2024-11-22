@@ -62,6 +62,7 @@ public class RealisticEconomy extends JavaPlugin{
         }
         
         langHandler = new LangManager(this);
+        
         economy = new com.ar.askgaming.realisticeconomy.Economy.Economy(this);
         economyService = new EconomyTransactions(this);
         serverBank = new BankTransactions(this);

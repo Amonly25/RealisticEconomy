@@ -25,6 +25,7 @@ public class LoteryManager {
 
     public LoteryManager(RealisticEconomy main) {
         plugin = main;
+        lang = plugin.getLang();
 
         loteryFile = new File(plugin.getDataFolder(), "lotery.yml");
         if (!loteryFile.exists()) {
@@ -51,7 +52,7 @@ public class LoteryManager {
             }
         }
     }
-    private LangManager lang = plugin.getLang();
+    private LangManager lang;
 
     private HashMap<String, Lotery> loteryList = new HashMap<>();
 
