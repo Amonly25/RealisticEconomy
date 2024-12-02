@@ -97,13 +97,13 @@ public class BankCommands implements TabExecutor{
     }
     //#region info
     private void showBankInfo(Player p, PlayerData pd) {
-        p.sendMessage(plugin.getLang().getFrom("bank.info.inflation", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomy().getInflation())));
-        p.sendMessage(plugin.getLang().getFrom("bank.info.interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomy().getLoanInterest())));
-        p.sendMessage(plugin.getLang().getFrom("bank.info.savings_interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomy().getSavingsInterest())));
+        p.sendMessage(plugin.getLang().getFrom("bank.info.inflation", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getInflation())));
+        p.sendMessage(plugin.getLang().getFrom("bank.info.interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getLoanInterest())));
+        p.sendMessage(plugin.getLang().getFrom("bank.info.savings_interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getSavingsInterest())));
         p.sendMessage("");
-        double savingsInterest = pd.getBalance() * plugin.getEconomy().getSavingsInterest() / 100;
+        double savingsInterest = pd.getBalance() * plugin.getEconomyManager().getSavingsInterest() / 100;
         p.sendMessage(plugin.getLang().getFrom("bank.info.balance", p.getLocale()).replace("{value}", String.valueOf(pd.getBankBalance())).replace("{interest}", String.valueOf(savingsInterest)));
-        double loanInterest = pd.getDebt() * plugin.getEconomy().getLoanInterest() / 100;
+        double loanInterest = pd.getDebt() * plugin.getEconomyManager().getLoanInterest() / 100;
         String extra = pd.getDebt() > 0 ? " (Acumula " + loanInterest + " de interes por dia)" : "";
         p.sendMessage(plugin.getLang().getFrom("bank.info.debt", p.getLocale()).replace("{value}", String.valueOf(pd.getDebt())).replace("{interest}", extra));
 
@@ -114,7 +114,7 @@ public class BankCommands implements TabExecutor{
             p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
         }
-        if (pd.getDebt() >= plugin.getEconomy().getDebtLimit()) {
+        if (pd.getDebt() >= plugin.getEconomyManager().getDebtLimit()) {
             p.sendMessage(plugin.getLang().getFrom("bank.debt_limit", p.getLocale()));
             return;
         }

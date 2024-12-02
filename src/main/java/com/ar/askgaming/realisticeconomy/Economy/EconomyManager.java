@@ -11,7 +11,7 @@ import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
 import com.ar.askgaming.realisticeconomy.Data.PlayerData;
 
-public class Economy {
+public class EconomyManager {
 
     private double balance;
     private double inicialBalance;
@@ -24,7 +24,7 @@ public class Economy {
 
     private DatabaseManager database;
 
-    public Economy(RealisticEconomy plugin) {
+    public EconomyManager(RealisticEconomy plugin) {
         this.plugin = plugin;
         this.inicialBalance = plugin.getConfig().getDouble("initial_server_bank_balance", 1000000000.0);
         this.inflation = 0.0;

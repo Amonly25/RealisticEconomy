@@ -9,9 +9,9 @@ C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming
 C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Data\LangManager.java
 C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Data\PlayerData.java
 C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Economy\BankTransactions.java
-C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Economy\Economy.java
 C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Economy\EconomyLogger.java
-C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Economy\EconomyTransactions.java
+C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Economy\EconomyManager.java
+C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Economy\EconomyService.java
 C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Economy\Tokens.java
 C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Listeners\PlayerJoinListener.java
 C:\Users\Luisito\Desktop\vs_code\RealisticEconomy\src\main\java\com\ar\askgaming\realisticeconomy\Lotery\Lotery.java

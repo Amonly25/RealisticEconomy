@@ -18,7 +18,8 @@ import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
 import com.ar.askgaming.realisticeconomy.Data.LangManager;
 import com.ar.askgaming.realisticeconomy.Economy.BankTransactions;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyLogger;
-import com.ar.askgaming.realisticeconomy.Economy.EconomyTransactions;
+import com.ar.askgaming.realisticeconomy.Economy.EconomyManager;
+import com.ar.askgaming.realisticeconomy.Economy.EconomyService;
 import com.ar.askgaming.realisticeconomy.Listeners.PlayerJoinListener;
 import com.ar.askgaming.realisticeconomy.Lotery.Lotery;
 import com.ar.askgaming.realisticeconomy.Lotery.LoteryManager;
@@ -31,12 +32,12 @@ public class RealisticEconomy extends JavaPlugin{
 
     private String serverLang;
 
-    private EconomyTransactions economyService;
+    private EconomyService economyService;
     private BankTransactions serverBank;
     private UtilityMethods utilityMethods;
     private LoteryManager loteryManager;
     private AuctionManager auctionManager;
-    private com.ar.askgaming.realisticeconomy.Economy.Economy economy;
+    private EconomyManager economyManager;
 
     private DatabaseManager database;
     private LangManager langHandler;
@@ -63,8 +64,8 @@ public class RealisticEconomy extends JavaPlugin{
         
         langHandler = new LangManager(this);
         
-        economy = new com.ar.askgaming.realisticeconomy.Economy.Economy(this);
-        economyService = new EconomyTransactions(this);
+        economyManager = new EconomyManager(this);
+        economyService = new EconomyService(this);
         serverBank = new BankTransactions(this);
         loteryManager = new LoteryManager(this);
         auctionManager = new AuctionManager(this);
@@ -73,7 +74,7 @@ public class RealisticEconomy extends JavaPlugin{
         economyLogger = new EconomyLogger(this);
         utilityMethods = new UtilityMethods(this);
         
-        getServer().getServicesManager().register(EconomyTransactions.class, economyService, this, ServicePriority.Highest);
+        getServer().getServicesManager().register(EconomyService.class, economyService, this, ServicePriority.Highest);
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
@@ -95,13 +96,14 @@ public class RealisticEconomy extends JavaPlugin{
         //sqlDatabase.close();
     }
     private boolean setupVault() {
+        vaultHook = new VaultHook(this);
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
         getServer().getServicesManager().register(Economy.class, vaultHook, this, ServicePriority.Normal);
         return true;
     }
-    public EconomyTransactions getEconomyService() {
+    public EconomyService getEconomyService() {
         return economyService;
     }
     public BankTransactions getServerBank() {
@@ -122,14 +124,15 @@ public class RealisticEconomy extends JavaPlugin{
     public UtilityMethods getUtilityMethods() {
         return utilityMethods;
     }
-    public com.ar.askgaming.realisticeconomy.Economy.Economy getEconomy() {
-        return economy;
-    }
+
     public LoteryManager getLoteryManager() {
         return loteryManager;
     }
     public AuctionManager getAuctionManager() {
         return auctionManager;
+    }
+    public EconomyManager getEconomyManager() {
+        return economyManager;
     }
 
 }

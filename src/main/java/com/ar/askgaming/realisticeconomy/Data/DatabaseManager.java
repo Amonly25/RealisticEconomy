@@ -185,7 +185,7 @@ public class DatabaseManager {
                     playerCache.put(playerUUID, playerData);
                     return playerData;
                 } else {
-                    return plugin.getEconomy().createPlayerAccount(playerUUID);
+                    return plugin.getEconomyManager().createPlayerAccount(playerUUID);
                 }
             }
         } catch (SQLException e) {

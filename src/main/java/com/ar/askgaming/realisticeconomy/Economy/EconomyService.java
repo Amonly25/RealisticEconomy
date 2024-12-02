@@ -8,12 +8,12 @@ import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
 import com.ar.askgaming.realisticeconomy.Data.PlayerData;
 
-public class EconomyTransactions {
+public class EconomyService {
 
     private DatabaseManager database;
     private RealisticEconomy plugin;
 
-    public EconomyTransactions(RealisticEconomy main) {
+    public EconomyService(RealisticEconomy main) {
         plugin = main;
         database = plugin.getDatabase();
     }
