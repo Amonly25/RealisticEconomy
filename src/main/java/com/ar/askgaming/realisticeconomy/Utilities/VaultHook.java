@@ -123,7 +123,7 @@ public class VaultHook implements Economy{
 
     @Override
     public double getBalance(OfflinePlayer arg0) {
-        return plugin.getDatabase().loadPlayerData(arg0.getUniqueId()).getBalance();
+        return plugin.getEconomyService().getBalance(arg0.getUniqueId());
     }
 
     @Override
@@ -153,7 +153,7 @@ public class VaultHook implements Economy{
 
     @Override
     public boolean has(OfflinePlayer arg0, double arg1) {
-        return plugin.getDatabase().loadPlayerData(arg0.getUniqueId()).getBalance() >= arg1;
+        return plugin.getEconomyService().getBalance(arg0.getUniqueId()) >= arg1;
     }
 
     @Override
