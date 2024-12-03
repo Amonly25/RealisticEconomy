@@ -1,5 +1,7 @@
 package com.ar.askgaming.realisticeconomy.Economy;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -120,5 +122,22 @@ public class EconomyManager {
 
     public void setSavingsInterest(double savingsInterest) {
         this.savingsInterest = savingsInterest;
+    }
+    public static double formatDouble(double number) {
+        String numberStr = Double.toString(number);
+        int decimalIndex = numberStr.indexOf('.');
+        
+        if (decimalIndex < 0) {
+            return number; // No hay punto decimal, es un número entero
+        }
+
+        int numDecimals = numberStr.length() - decimalIndex - 1;
+        
+        if (numDecimals > 4) {
+            BigDecimal bd = new BigDecimal(number).setScale(4, RoundingMode.HALF_UP);
+            return bd.doubleValue();
+        } else {
+            return number;
+        }
     }
 }

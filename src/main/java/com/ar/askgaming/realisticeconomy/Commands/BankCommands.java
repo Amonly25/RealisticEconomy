@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 import com.ar.askgaming.realisticeconomy.Data.PlayerData;
+import com.ar.askgaming.realisticeconomy.Economy.EconomyManager;
 
 public class BankCommands implements TabExecutor{
 
@@ -58,6 +59,7 @@ public class BankCommands implements TabExecutor{
                     return true;
                 }
                 amount = Double.parseDouble(args[1]);
+                amount = EconomyManager.formatDouble(amount);
                 takeLoan(p, pd, amount);
                 break;
     
@@ -67,6 +69,7 @@ public class BankCommands implements TabExecutor{
                     return true;
                 }
                 amount = Double.parseDouble(args[1]);
+                amount = EconomyManager.formatDouble(amount);
                 payDebt(p, pd, amount);
                 break;
     
@@ -76,6 +79,7 @@ public class BankCommands implements TabExecutor{
                     return true;
                 }
                 amount = Double.parseDouble(args[1]);
+                amount = EconomyManager.formatDouble(amount);
                 depositToBank(p, pd, amount);
                 break;
     
@@ -85,6 +89,7 @@ public class BankCommands implements TabExecutor{
                     return true;
                 }
                 amount = Double.parseDouble(args[1]);
+                amount = EconomyManager.formatDouble(amount);
                 withdrawFromBank(p, pd, amount);
                 break;
     
@@ -101,11 +106,16 @@ public class BankCommands implements TabExecutor{
         p.sendMessage(plugin.getLang().getFrom("bank.info.interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getLoanInterest())));
         p.sendMessage(plugin.getLang().getFrom("bank.info.savings_interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getSavingsInterest())));
         p.sendMessage("");
+        
         double savingsInterest = pd.getBalance() * plugin.getEconomyManager().getSavingsInterest() / 100;
-        p.sendMessage(plugin.getLang().getFrom("bank.info.balance", p.getLocale()).replace("{value}", String.valueOf(pd.getBankBalance())).replace("{interest}", String.valueOf(savingsInterest)));
+
+        String formattedNumber = String.format("%.4f", savingsInterest);
+        p.sendMessage(plugin.getLang().getFrom("bank.info.balance", p.getLocale()).replace("{value}", String.valueOf(pd.getBankBalance())).replace("{interest}", formattedNumber));
+        
         double loanInterest = pd.getDebt() * plugin.getEconomyManager().getLoanInterest() / 100;
-        String extra = pd.getDebt() > 0 ? " (Acumula " + loanInterest + " de interes por dia)" : "";
-        p.sendMessage(plugin.getLang().getFrom("bank.info.debt", p.getLocale()).replace("{value}", String.valueOf(pd.getDebt())).replace("{interest}", extra));
+        String formattedNumber2 = String.format("%.4f", loanInterest);
+        
+        p.sendMessage(plugin.getLang().getFrom("bank.info.debt", p.getLocale()).replace("{value}", String.valueOf(pd.getDebt())).replace("{interest}", formattedNumber2));
 
     }
     //#region loan

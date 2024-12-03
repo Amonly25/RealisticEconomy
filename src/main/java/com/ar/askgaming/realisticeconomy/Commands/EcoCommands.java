@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 import com.ar.askgaming.realisticeconomy.Data.PlayerData;
+import com.ar.askgaming.realisticeconomy.Economy.EconomyManager;
 
 public class EcoCommands implements TabExecutor{
 
@@ -85,6 +86,10 @@ public class EcoCommands implements TabExecutor{
         }
         return true;
     }
+
+    private double round(double d){
+        return EconomyManager.formatDouble(d);
+    }
     //#region pay
     private void payCommand(Player p, String[] args) {
 
@@ -97,21 +102,21 @@ public class EcoCommands implements TabExecutor{
         if (player == null){
             return;
         }
-
+        double d;
         try {
-            Double d = Double.valueOf(args[2]);
-
-            boolean transaction = plugin.getEconomyService().playerPayPlayer(p.getUniqueId(), player.getUniqueId(), d);
-            if (transaction){
-                p.sendMessage(plugin.getLang().getFrom("transactions.pay", p.getLocale()).replace("%player%", args[1]).replace("%amount%", String.valueOf(d)));
-                if (player.isOnline()){
-                    player.getPlayer().sendMessage(plugin.getLang().getFrom("transactions.pay_notify", player.getPlayer().getLocale()).replace("%player%", p.getName()).replace("%amount%", args[2]));
-                }
-            } else p.sendMessage(getMsg("error.transaction",p));
-
+            d = Double.valueOf(args[2]);
         } catch (Exception e) {
             p.sendMessage(getMsg("error.invalid_amount", p));
+            return;
         }
+        d = round(d);
+        boolean transaction = plugin.getEconomyService().playerPayPlayer(p.getUniqueId(), player.getUniqueId(), d);
+        if (transaction){
+            p.sendMessage(plugin.getLang().getFrom("transactions.pay", p.getLocale()).replace("{player}", args[1]).replace("{amount}", String.valueOf(d)));
+            if (player.isOnline()){
+                player.getPlayer().sendMessage(plugin.getLang().getFrom("transactions.pay_notify", player.getPlayer().getLocale()).replace("{player}", p.getName()).replace("{amount}", args[2]));
+            }
+        } else p.sendMessage(getMsg("error.transaction",p));
         
     }
     //#region balance
@@ -123,7 +128,8 @@ public class EcoCommands implements TabExecutor{
                 return;
             }
             double balance = plugin.getEconomyService().getBalance(player.getUniqueId());
-            p.sendMessage(plugin.getLang().getFrom("balance_other", p.getLocale()).replace("{balance}", String.valueOf(balance)).replace("{player}", args[1]));
+            
+            p.sendMessage(plugin.getLang().getFrom("balance_other", p.getLocale()).replace("{balance}", balance+"").replace("{player}", args[1]));
             return;
         }
         PlayerData playerData = plugin.getDatabase().loadPlayerData(p.getUniqueId());
@@ -133,64 +139,70 @@ public class EcoCommands implements TabExecutor{
         }
         double balance = playerData.getBalance();
         double bankBalance = playerData.getBankBalance();
-        double debt = playerData.getDebt();
-        double tokens = playerData.getTokens();
-        p.sendMessage(plugin.getLang().getFrom("balance", p.getLocale()).replace("{balance}", String.valueOf(balance)));
-        p.sendMessage(plugin.getLang().getFrom("bank_balance", p.getLocale()).replace("{balance}", String.valueOf(bankBalance)));
-        p.sendMessage(plugin.getLang().getFrom("debt", p.getLocale()).replace("{amount}", String.valueOf(debt)));
-        p.sendMessage(plugin.getLang().getFrom("tokens", p.getLocale()).replace("{amount}", String.valueOf(tokens)));
+       
+        p.sendMessage(plugin.getLang().getFrom("balance", p.getLocale()).replace("{balance}", balance+""));
+        p.sendMessage(plugin.getLang().getFrom("bank_balance", p.getLocale()).replace("{balance}", bankBalance+""));
+
     }
     //#region add
     public void handleAddCommand(Player p, String[] args){
-        if (args.length == 3){
-            try {
-                double d = Double.valueOf(args[2]);
-                OfflinePlayer player = checkPlayer(p, args[1]);
-                
-                if (player == null){
-                    return;
-                }
-
-                boolean bank = plugin.getServerBank().withdrawFromServerToPlayer(player.getUniqueId(), d);
-                if (bank){
-                    p.sendMessage(plugin.getLang().getFrom("economy.add_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
-                    if (player.isOnline()){
-                        player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.add_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
-                    }
-                } else p.sendMessage(getMsg("error.transaction",p));
-    
-            } catch (Exception e) {
-                System.err.println(e);
-                p.sendMessage(getMsg("error.invalid_amount", p));
-            } 
-        } else {
+        if (args.length != 3){
             p.sendMessage("Error, use: /eco add <player> <amount>");
+            return;
         }
+        OfflinePlayer player = checkPlayer(p, args[1]);
+            
+        if (player == null){
+            return;
+        }
+        double d;
+        try {
+            d = Double.valueOf(args[2]);    
+        } catch (Exception e) {
+            System.err.println(e);
+            p.sendMessage(getMsg("error.invalid_amount", p));
+            return;
+        } 
+        d = round(d);
+        boolean bank = plugin.getServerBank().withdrawFromServerToPlayer(player.getUniqueId(), d);
+
+        if (bank){
+            p.sendMessage(plugin.getLang().getFrom("economy.add_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
+            if (player.isOnline()){
+                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.add_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
+            }
+        } else p.sendMessage(getMsg("error.transaction",p));
+        
     }
     //#region take
     public void handleTakeCommand(Player p, String[] args){
-        if (args.length == 3){
-            try {
-                double d = Double.valueOf(args[2]);
-                OfflinePlayer player = checkPlayer(p, args[1]);
-                
-                if (player == null){
-                    return;
-                }
-                boolean transaction = plugin.getServerBank().depositFromPlayerToServer(player.getUniqueId(), d);
-                if (transaction){
-                    p.sendMessage(plugin.getLang().getFrom("economy.take_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
-                    if (player.isOnline()){
-                        player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.take_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
-                    }
-                } else p.sendMessage(getMsg("error.transaction",p));
 
-            } catch (Exception e) {
-                p.sendMessage(getMsg("error.invalid_amount", p));
-            }
-        } else {
+        if (args.length != 3){
             p.sendMessage("Error: use: /eco take <player> <amount>");
+            return;
         }
+        OfflinePlayer player = checkPlayer(p, args[1]);
+            
+        if (player == null){
+            return;
+        }
+        double d;
+        
+        try {
+            d = Double.valueOf(args[2]);
+        } catch (Exception e) {
+            p.sendMessage(getMsg("error.invalid_amount", p));
+            return;
+        }
+        d = round(d);
+        boolean transaction = plugin.getServerBank().depositFromPlayerToServer(player.getUniqueId(), d);
+        if (transaction){
+            p.sendMessage(plugin.getLang().getFrom("economy.take_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
+            if (player.isOnline()){
+                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.take_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
+            }
+        } else p.sendMessage(getMsg("error.transaction",p));
+        
     }
     public void handleServerCommand(Player p, String[] args){
         double d = plugin.getServerBank().getBalance();
@@ -201,37 +213,42 @@ public class EcoCommands implements TabExecutor{
 
     public void setCommand(Player p, String[] args){
 
-        if (args.length == 3){
-            if (!warn.contains(p)){
-                p.sendMessage("§cWarning: This command will set the balance of the player without bank transaction.");
-                p.sendMessage("§cThis action can disturb the economy of the server, use with caution.");
-                p.sendMessage("§cIf you are sure, use the command again.");
-                warn.add(p);
-                return;
-            }
-            try {
-                double d = Double.valueOf(args[2]);
-                OfflinePlayer player = checkPlayer(p, args[1]);
-
-                if (player == null){
-                    return;
-                }
-                
-                warn.remove(p);
-
-                boolean transaction = plugin.getEconomyService().setPlayerBalance(player.getUniqueId(), d);
-                if (transaction){
-                    p.sendMessage(plugin.getLang().getFrom("economy.set_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
-                    if (player.isOnline()){
-                        player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.set_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
-                    }
-                } else p.sendMessage(getMsg("error.transaction",p));
-            } catch (Exception e) {
-                p.sendMessage(getMsg("error.invalid_amount", p));
-            }
-        } else {
+        if (args.length != 3){
             p.sendMessage("Error, use: /eco set <player> <amount>");
+            return;
         }
+        if (!warn.contains(p)){
+            p.sendMessage("§cWarning: This command will set the balance of the player without bank transaction.");
+            p.sendMessage("§cThis action can disturb the economy of the server, use with caution.");
+            p.sendMessage("§cIf you are sure, use the command again.");
+            warn.add(p);
+            return;
+        }
+        double d;
+        try {
+            d = Double.valueOf(args[2]);
+
+        } catch (Exception e) {
+            p.sendMessage(getMsg("error.invalid_amount", p));
+            return;
+        }
+        d = round(d);
+        OfflinePlayer player = checkPlayer(p, args[1]);
+
+        if (player == null){
+            return;
+        }
+        
+        warn.remove(p);
+
+        boolean transaction = plugin.getEconomyService().setPlayerBalance(player.getUniqueId(), d);
+        if (transaction){
+            p.sendMessage(plugin.getLang().getFrom("economy.set_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
+            if (player.isOnline()){
+                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.set_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
+            }
+        } else p.sendMessage(getMsg("error.transaction",p));
+        
     }
     //#region top
     public void topCommand(Player p, String[] args){
