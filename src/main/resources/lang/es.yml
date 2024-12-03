@@ -1,0 +1,74 @@
+balance: "&aTu saldo es {balance}: "
+bank_balance: "&6El saldo del banco es {balance}: "
+debt: "&c¡Le debes {amount} al banco!"
+tokens: "&b¡Tienes {amount} tokens!"
+
+balance_other: "&aEl jugador {player} tiene {balance}: "
+server_balance: "&aEl saldo del servidor es {balance}: "
+
+economy:
+    add_player: "&a¡Se han añadido {amount} a {player} desde el banco del servidor!"
+    add_player_notify: "&a¡Has recibido {amount} del banco del servidor!"
+    take_player: "&c¡Se han retirado {amount} de {player} al banco del servidor!"
+    take_player_notify: "&c¡Se han retirado {amount} de tu saldo al banco del servidor!"
+    set_player: "&a¡El saldo del jugador {player} se ha establecido en {amount}!"
+    set_player_notify: "&a¡Tu saldo se ha establecido en {amount}!"
+
+bank:
+    deposit: "&6¡Has depositado {amount} en el banco!"
+    withdraw: "&6¡Has retirado {amount} del banco!"
+    pay_debt : "&6¡Has pagado {amount} al banco!"
+    debt_limit: "&6¡No puedes tomar más dinero del banco!"
+    no_bank_enought: "&c¡El banco no tiene suficiente dinero para pagar los intereses!"
+    interest: "&6El banco te ha pagado {amount} de interés."
+    loan: "&6¡Has tomado un préstamo de {amount} del banco!"
+    loan_interest: "&6¡Debes pagar {amount} de interés por tu préstamo!"
+    info:
+        inflation: "&eInflación: {value}%"
+        interest: "&eInterés: {value}%"
+        savings_interest: "&eInterés de ahorros: {value}%"
+        balance: "&2Saldo del banco: {value} - Ganas {interest} por día."
+        debt: "&cDeuda: {value} - Pagas {interest} por día."
+
+token:
+    pay: "&6Le has pagado {amount} tokens a {player}."
+    receive: "&6{player} te ha pagado {amount} tokens."
+
+lottery:
+    create: "&a¡La lotería {name} ha sido creada!"
+    remove: "&c¡La lotería {name} ha sido eliminada!"   
+    drawn: "&a¡La lotería {name} ha sido sorteada!"
+    number: "&aEl número es: {number}!"
+    no_winners: "&c¡No hay ganadores esta vez!"
+    winners: "&aLos ganadores son: {list}!"
+    reward: "&aLa recompensa es: {amount}!"
+    won: "&a¡Has ganado {amount}!"
+    taxes: "&c¡Debes pagar impuestos: {taxes}!"
+    no_active: "&c¡Esta lotería no está activa!"
+    number_limit: "&c¡El número debe estar entre 1 y {number}!"
+    buy: "&aHas comprado un boleto para el número {number}"
+    player_buy: "&aUn jugador ha comprado un boleto para la lotería {name}"
+    reset: "&a¡La lotería ha sido reiniciada, puedes comprar boletos de nuevo!"
+    info:
+        name: "&7Nombre: {name}"
+        jackpot: "&7Premio mayor: {jackpot}"
+        ticket_price: "&7Precio: {price}"
+        number_limit: "&7Números: {numbers}"
+        tickets_sold: "&7Boletos vendidos: {sold}"
+        active: "&7Activo: {active}"
+
+error:
+    player_not_found: "&c¡Jugador no encontrado!"
+    transaction: "&cError en la transacción, intenta de nuevo más tarde o revisa el saldo."
+    invalid_amount: "&c¡Monto inválido!"
+    not_enough: "&c¡No tienes suficiente dinero!"
+
+transactions:
+    pay: "&aLe pagaste {amount} a {player}."
+    pay_notify: "&a{player} te ha pagado {amount}."
+
+commands:
+    no_perm: "&c¡No tienes permiso para hacer eso!"
+
+misc:
+    pages: "&6Balance top: páginas "

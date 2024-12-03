@@ -19,6 +19,7 @@ public class PlayerJoinListener implements Listener{
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         plugin.getDatabase().loadPlayerData(player.getUniqueId());
+        plugin.getTimeManager().checkPlayer(player);
         
     }
 }

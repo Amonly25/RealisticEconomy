@@ -2,6 +2,7 @@ package com.ar.askgaming.realisticeconomy.Commands;
 
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -23,7 +24,7 @@ public class BankCommands implements TabExecutor{
         if (args.length == 1) {
             return List.of("loan", "pay", "deposit", "withdraw", "info");
         } else {
-            return List.of();
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         }
     }
 
@@ -131,9 +132,11 @@ public class BankCommands implements TabExecutor{
         if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), amount)) {
             pd.setDebt(pd.getDebt() + amount);
             pd.save();
+            plugin.getEconomyLogger().log("Player " + p.getName() + " took a loan of " + amount);
             p.sendMessage(plugin.getLang().getFrom("bank.loan", p.getLocale()).replace("{amount}", String.valueOf(amount)));
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+           // plugin.getEconomyLogger().log("Player " + p.getName() + " tried to take a loan of " + amount + " but the transaction failed");
         }
     }
     //#region pay
@@ -145,9 +148,11 @@ public class BankCommands implements TabExecutor{
         if (plugin.getServerBank().depositFromPlayerToServer(p.getUniqueId(), amount)) {
             pd.setDebt(pd.getDebt() - amount);
             pd.save();
+            plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + amount + " of debt");
             p.sendMessage(plugin.getLang().getFrom("bank.pay_debt", p.getLocale()).replace("{amount}", String.valueOf(amount)));
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+            //plugin.getEconomyLogger().log("Player " + p.getName() + " tried to pay " + amount + " of debt but the transaction failed");
         }
     }
     //#region deposit
@@ -158,8 +163,11 @@ public class BankCommands implements TabExecutor{
         }
         if (plugin.getEconomyService().depositToPlayerBank(p.getUniqueId(), amount)) {
             p.sendMessage(plugin.getLang().getFrom("bank.deposit", p.getLocale()).replace("{amount}", String.valueOf(amount)));
+            plugin.getEconomyLogger().log("Player " + p.getName() + " deposited " + amount + " to the bank");
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+           // plugin.getEconomyLogger().log("Player " + p.getName() + " tried to deposit " + amount + " to the bank but the transaction failed");
+
         }
     }
     //#region withdraw
@@ -170,8 +178,10 @@ public class BankCommands implements TabExecutor{
         }
         if (plugin.getEconomyService().withdrawFromPlayerBank(p.getUniqueId(), amount)) {
             p.sendMessage(plugin.getLang().getFrom("bank.withdraw", p.getLocale()).replace("{amount}", String.valueOf(amount)));
+            plugin.getEconomyLogger().log("Player " + p.getName() + " withdrew " + amount + " from the bank");
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+           // plugin.getEconomyLogger().log("Player " + p.getName() + " tried to withdraw " + amount + " from the bank but the transaction failed");
         }
     }
     

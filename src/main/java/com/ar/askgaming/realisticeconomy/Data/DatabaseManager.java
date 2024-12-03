@@ -77,7 +77,8 @@ public class DatabaseManager {
                     + "balance REAL,"
                     + "bankBalance REAL,"
                     + "debt REAL,"
-                    + "tokens INTEGER"
+                    + "tokens INTEGER,"
+                    + "lastLogin BIGINT"
                     + ");";
                 break;
             case "MYSQL":
@@ -86,7 +87,8 @@ public class DatabaseManager {
                     + "balance DOUBLE,"
                     + "bankBalance DOUBLE,"
                     + "debt DOUBLE,"
-                    + "tokens INT"
+                    + "tokens INT,"
+                    + "lastLogin BIGINT"
                     + ");";
                 break;
             default:
@@ -170,7 +172,7 @@ public class DatabaseManager {
         if (playerCache.containsKey(playerUUID)) {
             return playerCache.get(playerUUID);
         }
-        String sql = "SELECT balance, bankBalance, debt, tokens FROM economy WHERE uuid = ?";
+        String sql = "SELECT balance, bankBalance, debt, tokens, lastLogin FROM economy WHERE uuid = ?";
         try (Connection conn = connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, playerUUID.toString());
@@ -180,8 +182,9 @@ public class DatabaseManager {
                     double bankBalance = rs.getDouble("bankBalance");
                     double debt = rs.getDouble("debt");
                     int tokens = rs.getInt("tokens");
+                    long lastConnected = rs.getLong("lastLogin");
                     // Almacenar en memoria
-                    PlayerData playerData = new PlayerData(playerUUID, balance, bankBalance, debt, tokens);
+                    PlayerData playerData = new PlayerData(playerUUID, balance, bankBalance, debt, tokens, lastConnected);
                     playerCache.put(playerUUID, playerData);
                     return playerData;
                 } else {

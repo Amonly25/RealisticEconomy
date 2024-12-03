@@ -36,6 +36,7 @@ public class BankTransactions {
     
         return 0.0; // Devolver 0.0 si no se encuentra un balance o hay un error
     }
+    //#region withdrawFromServerToPlayer
     public boolean withdrawFromServerToPlayer(UUID playerUUID, double amount) {
         if (amount < 0) {
             return false;
@@ -65,7 +66,7 @@ public class BankTransactions {
             if (!saveServerBankBalance(serverBalance - amount, serverBalance, conn)) {
                 return false;
             }
-        
+            plugin.getEconomyLogger().log("Withdrawn " + amount + " from server bank to player " + playerUUID);
             conn.commit(); // Confirmar la transacción
             return true;
     
@@ -77,7 +78,7 @@ public class BankTransactions {
         }
     }
     
-
+    //#region depositFromPlayerToServer
     public boolean depositFromPlayerToServer(UUID playerUUID, double amount) {
         if (amount < 0) {
             return false;
@@ -109,6 +110,7 @@ public class BankTransactions {
             }
     
             conn.commit(); // Confirmar la transacción
+            plugin.getEconomyLogger().log("Deposited " + amount + " from player " + playerUUID + " to server bank");
             return true;
     
         } catch (SQLException e) {
@@ -123,6 +125,7 @@ public class BankTransactions {
             return saveServerBankBalance(newBalance, getBalance(), conn);
         } catch (SQLException e) {
             e.printStackTrace();
+            plugin.getEconomyLogger().log("Error setting server bank balance: " + e.getMessage());
             return false;
         }
     }
@@ -135,6 +138,7 @@ public class BankTransactions {
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
         } catch (SQLException e) {
+            plugin.getEconomyLogger().log("Error updating server bank balance: " + e.getMessage());
             conn.rollback();
             throw e;
         }

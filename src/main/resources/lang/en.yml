@@ -1,5 +1,5 @@
 balance: "&aYour balance is {balance}: "
-bank_balance: "&2Bank balance is {balance}: "
+bank_balance: "&6Bank balance is {balance}: "
 debt: "&cYou owe {amount} to the bank!"
 tokens: "&bYou have {amount} tokens!"
 
@@ -19,7 +19,10 @@ bank:
     withdraw: "&6You have withdrawn {amount} from the bank!"
     pay_debt : "&6You have paid {amount} to the bank!"
     debt_limit: "&6You can't take more money from the bank!"
+    no_bank_enought: "&cThe bank doesn't have enough money to pay the interest!"
+    interest: "&6Bank has paid you {amount} interest.!"
     loan: "&6You have taken a loan of {amount} from the bank!"
+    loan_interest: "&6You have to pay {amount} interest for your loan!"
     info:
         inflation: "&eInflation: {value}%"
         interest: "&eInterest: {value}%"

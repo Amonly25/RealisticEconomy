@@ -1,0 +1,60 @@
+package com.ar.askgaming.realisticeconomy.Utilities;
+
+import org.bukkit.entity.Player;
+
+import com.ar.askgaming.realisticeconomy.RealisticEconomy;
+import com.ar.askgaming.realisticeconomy.Data.PlayerData;
+
+public class TimeManager {
+    
+    private RealisticEconomy plugin;
+
+    public TimeManager(RealisticEconomy main) {
+        plugin = main;
+    }
+    public void checkPlayer(Player p) {
+        
+        // Cargar los datos del jugador desde la base de datos
+        PlayerData pd = plugin.getDatabase().loadPlayerData(p.getUniqueId());
+    
+        // Obtener el tiempo de la última conexión y el tiempo actual
+        long lastConnected = pd.getLastConnected();
+        long currentTime = System.currentTimeMillis();
+        long timeDifference = currentTime - lastConnected;
+        long timeDifferenceInDays = timeDifference / (1000 * 60 * 60 * 24); // Convertir la diferencia de tiempo a días
+    
+        // Si ha pasado al menos un día desde la última conexión
+        if (timeDifferenceInDays > 0) {
+            // Calcular el interés sobre el saldo bancario del jugador
+            double balance = pd.getBankBalance();
+            double interestRate = plugin.getEconomyManager().getSavingsInterest();
+            double deposit = balance * interestRate * timeDifferenceInDays;
+    
+            // Verificar si el banco del servidor tiene suficiente saldo para pagar el interés
+            if (plugin.getServerBank().getBalance() < deposit) {
+                deposit = plugin.getServerBank().getBalance();
+                p.sendMessage(plugin.getLang().getFrom("bank.no_bank_enought", p.getLocale()));
+            }
+    
+            // Transferir el interés al jugador
+            if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), deposit)) {
+                p.sendMessage(plugin.getLang().getFrom("bank.interest", p.getLocale()).replace("{amount}", String.valueOf(deposit)));
+            } else {
+                p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+            }
+    
+            // Calcular el interés sobre la deuda del jugador
+            double loan = pd.getDebt();
+            double interestRateLoan = plugin.getEconomyManager().getLoanInterest();
+            double interest = loan * interestRateLoan * timeDifferenceInDays;
+    
+            // Si hay interés sobre la deuda
+            if (interest > 0) {
+                p.sendMessage(plugin.getLang().getFrom("bank.loan_interest", p.getLocale()));
+                pd.setDebt(interest + loan); // Actualizar la deuda del jugador
+                pd.checkSeizedAccount(); // Verificar si la cuenta del jugador debe ser embargada
+                pd.save(); // Guardar los datos del jugador
+            }
+        }
+    }
+}

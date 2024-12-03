@@ -53,10 +53,10 @@ public class EconomyManager {
         String sql;
         switch (database.getDatabaseType()) {
             case "SQLITE":
-                sql = "INSERT OR IGNORE INTO economy (uuid, balance, bankBalance, debt, tokens) VALUES (?, 0, 0, 0, 0)";
+                sql = "INSERT OR IGNORE INTO economy (uuid, balance, bankBalance, debt, tokens, lastLogin) VALUES (?, 0, 0, 0, 0, 0)";
                 break;
             case "MYSQL":
-                sql = "INSERT INTO economy (uuid, balance, bankBalance, debt, tokens) VALUES (?, 0, 0, 0, 0) ON DUPLICATE KEY UPDATE uuid=uuid";
+                sql = "INSERT INTO economy (uuid, balance, bankBalance, debt, tokens, lastLogin) VALUES (?, 0, 0, 0, 0, 0) ON DUPLICATE KEY UPDATE uuid=uuid";
                 break;
             default:
                 throw new IllegalStateException("Unknown data mode: " + database.getDatabaseType());
@@ -66,7 +66,7 @@ public class EconomyManager {
             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
             stmt.executeUpdate();
-            return new PlayerData(uuid, 0, 0, 0, 0);
+            return new PlayerData(uuid, 0, 0, 0, 0,0);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

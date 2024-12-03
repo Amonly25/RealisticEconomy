@@ -85,7 +85,7 @@ public class TokenCommands implements TabExecutor{
         }
 
         if (plugin.getEconomyService().playerPayTokenToPlayer(p.getUniqueId(), target.getUniqueId(), amount)){
-
+            plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + amount + " tokens to " + target.getName());
             p.sendMessage(plugin.getLang().getFrom("token.pay", p.getLocale()).replace("{player}", target.getName()).replace("{amount}", String.valueOf(amount)));
             target.sendMessage(plugin.getLang().getFrom("token.receive", p.getLocale()).replace("{player}", p.getName()).replace("{amount}", String.valueOf(amount)));
         } else {

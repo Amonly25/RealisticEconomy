@@ -15,18 +15,30 @@ public class PlayerData {
     private double bankBalance;
     private double debt;
     private int tokens;
+    private boolean seized_account;
+    private long lastConnected;
 
     private UUID playerUUID;
 
-    public PlayerData(UUID playerUUID, double balance, double bankBalance, double debt, int tokens) {
+    public PlayerData(UUID playerUUID, double balance, double bankBalance, double debt, int tokens, long lastConnected) {
         this.balance = balance;
         this.bankBalance = bankBalance;
         this.debt = debt;
         this.tokens = tokens;
         this.playerUUID = playerUUID;
+        this.lastConnected = lastConnected;
+
+        checkSeizedAccount();
     }
     public double getBalance() {
         return balance;
+    }
+    public void checkSeizedAccount() {
+        if (debt >= plugin.getConfig().getDouble("debt_limit")) {
+            seized_account = true;
+        } else {
+            seized_account = false;
+        }
     }
     public void setBalance(double balance) {
         this.balance = balance;
@@ -54,14 +66,16 @@ public class PlayerData {
         return playerUUID;
     }
     public boolean save() {
-        String sql = "UPDATE economy SET balance = ?, bankBalance = ?, debt = ?, tokens = ? WHERE uuid = ?";
+        String sql = "UPDATE economy SET balance = ?, bankBalance = ?, debt = ?, tokens = ?, lastLogin = ? WHERE uuid = ?";
         try (Connection conn = plugin.getDatabase().connect();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, getBalance());
             stmt.setDouble(2, getBankBalance());
             stmt.setDouble(3, getDebt());
             stmt.setInt(4, getTokens());
-            stmt.setString(5, getPlayerUUID().toString());
+            stmt.setLong(5, getLastConnected());
+            stmt.setString(6, getPlayerUUID().toString());
+            
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -71,5 +85,17 @@ public class PlayerData {
             return false;
         }
     }
-
+    
+    public boolean isSeized_account() {
+        return seized_account;
+    }
+    public void setSeized_account(boolean seized_account) {
+        this.seized_account = seized_account;
+    }
+    public long getLastConnected() {
+        return lastConnected;
+    }
+    public void setLastConnected(long lastConnected) {
+        this.lastConnected = lastConnected;
+    }
 }

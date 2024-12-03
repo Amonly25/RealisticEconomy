@@ -25,8 +25,10 @@ public class EcoCommands implements TabExecutor{
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length == 1){
+            return List.of("balance","add","take","pay","server","top");
 
-        return List.of("balance","add","take","pay","server","top");
+        } else return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
     }
 
     @Override
@@ -116,6 +118,7 @@ public class EcoCommands implements TabExecutor{
             if (player.isOnline()){
                 player.getPlayer().sendMessage(plugin.getLang().getFrom("transactions.pay_notify", player.getPlayer().getLocale()).replace("{player}", p.getName()).replace("{amount}", args[2]));
             }
+            plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + args[1] + " " + args[2]);
         } else p.sendMessage(getMsg("error.transaction",p));
         
     }
@@ -171,6 +174,7 @@ public class EcoCommands implements TabExecutor{
             if (player.isOnline()){
                 player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.add_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
             }
+            plugin.getEconomyLogger().log("Player " + p.getName() + " added " + args[2] + " to " + args[1]);
         } else p.sendMessage(getMsg("error.transaction",p));
         
     }
@@ -201,6 +205,7 @@ public class EcoCommands implements TabExecutor{
             if (player.isOnline()){
                 player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.take_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
             }
+            plugin.getEconomyLogger().log("Player " + p.getName() + " took " + args[2] + " from " + args[1]);
         } else p.sendMessage(getMsg("error.transaction",p));
         
     }
@@ -247,6 +252,7 @@ public class EcoCommands implements TabExecutor{
             if (player.isOnline()){
                 player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.set_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
             }
+            plugin.getEconomyLogger().log("Player " + p.getName() + " set " + args[1] + " to " + args[2]);
         } else p.sendMessage(getMsg("error.transaction",p));
         
     }

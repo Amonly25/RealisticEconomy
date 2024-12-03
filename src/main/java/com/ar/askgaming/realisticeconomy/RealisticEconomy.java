@@ -23,6 +23,7 @@ import com.ar.askgaming.realisticeconomy.Economy.EconomyService;
 import com.ar.askgaming.realisticeconomy.Listeners.PlayerJoinListener;
 import com.ar.askgaming.realisticeconomy.Lotery.Lotery;
 import com.ar.askgaming.realisticeconomy.Lotery.LoteryManager;
+import com.ar.askgaming.realisticeconomy.Utilities.TimeManager;
 import com.ar.askgaming.realisticeconomy.Utilities.UtilityMethods;
 import com.ar.askgaming.realisticeconomy.Utilities.VaultHook;
 
@@ -38,7 +39,7 @@ public class RealisticEconomy extends JavaPlugin{
     private LoteryManager loteryManager;
     private AuctionManager auctionManager;
     private EconomyManager economyManager;
-
+    private TimeManager timeManager;
     private DatabaseManager database;
     private LangManager langHandler;
     private EconomyLogger economyLogger;
@@ -69,6 +70,7 @@ public class RealisticEconomy extends JavaPlugin{
         serverBank = new BankTransactions(this);
         loteryManager = new LoteryManager(this);
         auctionManager = new AuctionManager(this);
+        timeManager = new TimeManager(this);
 
         serverLang = getConfig().getString("server_lang", "en");
         economyLogger = new EconomyLogger(this);
@@ -133,6 +135,9 @@ public class RealisticEconomy extends JavaPlugin{
     }
     public EconomyManager getEconomyManager() {
         return economyManager;
+    }
+    public TimeManager getTimeManager() {
+        return timeManager;
     }
 
 }
