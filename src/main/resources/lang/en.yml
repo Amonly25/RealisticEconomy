@@ -21,6 +21,7 @@ bank:
     interest: "&6Bank has paid you {amount} interest.!"
     loan: "&6You have taken a loan of {amount} from the bank!"
     loan_interest: "&6You have to pay {amount} interest for your loan!"
+    seized_account: "&cYour account is seized by the bank, you have to pay until you have less than 5000."
     info:
         inflation: "&eInflation: {value}%"
         interest: "&eInterest: {value}%"

@@ -34,7 +34,7 @@ public class PlayerData {
         return balance;
     }
     public void checkSeizedAccount() {
-        if (debt >= plugin.getConfig().getDouble("debt_limit")) {
+        if (debt >= plugin.getConfig().getDouble("debt_limit") * 1.5) {
             seized_account = true;
         } else {
             seized_account = false;
@@ -86,7 +86,7 @@ public class PlayerData {
         }
     }
     
-    public boolean isSeized_account() {
+    public boolean isSeizedAccount() {
         return seized_account;
     }
     public void setSeized_account(boolean seized_account) {

@@ -141,6 +141,10 @@ public class BankCommands implements TabExecutor{
     }
     //#region pay
     private void payDebt(Player p, PlayerData pd, double amount) {
+        if (pd.isSeizedAccount()) {
+            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+            return;
+        }
         if (amount <= 0 || amount > pd.getBalance() || amount > pd.getDebt()) {
             p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
