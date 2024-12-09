@@ -35,7 +35,17 @@ public class EcoCommands implements TabExecutor{
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (!(sender instanceof Player)){
-            sender.sendMessage("This command can only be executed by a player to handle the language.");
+            switch (args[0].toLowerCase()) {
+                case "add":
+                    handleAddOrTake(sender, args, true);
+                    break;
+                case "take":
+                    handleAddOrTake(sender, args, false);
+                    break;
+                default:
+                    sender.sendMessage("Error, only /eco add and /eco take can be executed by console.");
+                    break;
+            }
             return true;
         }
         Player p = (Player) sender;
@@ -54,7 +64,7 @@ public class EcoCommands implements TabExecutor{
                 break;
             case "add":
                 if (p.hasPermission("eco.admin")){
-                    handleAddCommand(p, args);
+                    handleAddOrTake(sender, args, true);
                 } else {
                    p.sendMessage(plugin.getLang().getFrom("commands.no_perm",p.getLocale()));
                 }
@@ -64,7 +74,7 @@ public class EcoCommands implements TabExecutor{
                 break;
             case "take":
                 if (p.hasPermission("eco.admin")){
-                    handleTakeCommand(p, args);
+                    handleAddOrTake(sender, args, false);
                 } else {
                     p.sendMessage(plugin.getLang().getFrom("commands.no_perm",p.getLocale()));
                 }
@@ -147,67 +157,53 @@ public class EcoCommands implements TabExecutor{
         p.sendMessage(plugin.getLang().getFrom("bank_balance", p.getLocale()).replace("{balance}", bankBalance+""));
 
     }
-    //#region add
-    public void handleAddCommand(Player p, String[] args){
+    //#region add/take
+    private boolean preCommand(CommandSender sender, String[] args){
         if (args.length != 3){
-            p.sendMessage("Error, use: /eco add <player> <amount>");
-            return;
+            sender.sendMessage("Error, use: /eco add/take <player> <amount>");
+            return false;
         }
-        OfflinePlayer player = checkPlayer(p, args[1]);
+        OfflinePlayer player = checkPlayer(sender, args[1]);
             
         if (player == null){
-            return;
+            return false;
         }
-        double d;
         try {
-            d = Double.valueOf(args[2]);    
+            Double.valueOf(args[2]);    
         } catch (Exception e) {
-            System.err.println(e);
-            p.sendMessage(getMsg("error.invalid_amount", p));
-            return;
+            sender.sendMessage("Error, invalid amount.");
+            return false;
         } 
-        d = round(d);
-        boolean bank = plugin.getServerBank().withdrawFromServerToPlayer(player.getUniqueId(), d);
-
-        if (bank){
-            p.sendMessage(plugin.getLang().getFrom("economy.add_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
-            if (player.isOnline()){
-                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.add_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
-            }
-            plugin.getEconomyLogger().log("Player " + p.getName() + " added " + args[2] + " to " + args[1]);
-        } else p.sendMessage(getMsg("error.transaction",p));
         
+        return true;
+
     }
-    //#region take
-    public void handleTakeCommand(Player p, String[] args){
-
-        if (args.length != 3){
-            p.sendMessage("Error: use: /eco take <player> <amount>");
+    private void handleAddOrTake(CommandSender sender, String[] args, boolean isAdd) {
+        if (!preCommand(sender, args)) {
             return;
         }
-        OfflinePlayer player = checkPlayer(p, args[1]);
-            
-        if (player == null){
-            return;
+    
+        double amount = round(Double.valueOf(args[2]));
+        OfflinePlayer player = checkPlayer(sender, args[1]);
+    
+        boolean transactionSuccess;
+        if (isAdd) {
+            transactionSuccess = plugin.getServerBank().withdrawFromServerToPlayer(player.getUniqueId(), amount);
+        } else {
+            transactionSuccess = plugin.getServerBank().depositFromPlayerToServer(player.getUniqueId(), amount);
         }
-        double d;
-        
-        try {
-            d = Double.valueOf(args[2]);
-        } catch (Exception e) {
-            p.sendMessage(getMsg("error.invalid_amount", p));
-            return;
-        }
-        d = round(d);
-        boolean transaction = plugin.getServerBank().depositFromPlayerToServer(player.getUniqueId(), d);
-        if (transaction){
-            p.sendMessage(plugin.getLang().getFrom("economy.take_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
-            if (player.isOnline()){
-                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.take_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
+    
+        if (transactionSuccess) {
+            String action = isAdd ? "added" : "took";
+            String message = sender.getName() + " " + action + " " + args[2] + " " + (isAdd ? "to" : "from") + " " + args[1];
+            sender.sendMessage(message);
+            plugin.getEconomyLogger().log(message);
+            if (player.isOnline()) {
+                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy." + (isAdd ? "add" : "take") + "_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
             }
-            plugin.getEconomyLogger().log("Player " + p.getName() + " took " + args[2] + " from " + args[1]);
-        } else p.sendMessage(getMsg("error.transaction",p));
-        
+        } else {
+            sender.sendMessage("§cError, transaction failed.");
+        }
     }
     public void handleServerCommand(Player p, String[] args){
         double d = plugin.getServerBank().getBalance();
@@ -218,10 +214,12 @@ public class EcoCommands implements TabExecutor{
 
     public void setCommand(Player p, String[] args){
 
-        if (args.length != 3){
-            p.sendMessage("Error, use: /eco set <player> <amount>");
+        if (!preCommand(p, args)){
             return;
         }
+        double d = round(Double.valueOf(args[2]));
+        OfflinePlayer player = checkPlayer(p, args[1]);
+
         if (!warn.contains(p)){
             p.sendMessage("§cWarning: This command will set the balance of the player without bank transaction.");
             p.sendMessage("§cThis action can disturb the economy of the server, use with caution.");
@@ -229,21 +227,6 @@ public class EcoCommands implements TabExecutor{
             warn.add(p);
             return;
         }
-        double d;
-        try {
-            d = Double.valueOf(args[2]);
-
-        } catch (Exception e) {
-            p.sendMessage(getMsg("error.invalid_amount", p));
-            return;
-        }
-        d = round(d);
-        OfflinePlayer player = checkPlayer(p, args[1]);
-
-        if (player == null){
-            return;
-        }
-        
         warn.remove(p);
 
         boolean transaction = plugin.getEconomyService().setPlayerBalance(player.getUniqueId(), d);
@@ -270,7 +253,7 @@ public class EcoCommands implements TabExecutor{
         plugin.getUtilityMethods().listToPage(list, args, p);
     }
 
-    private OfflinePlayer checkPlayer(Player sender,String name){
+    private OfflinePlayer checkPlayer(CommandSender sender,String name){
         @SuppressWarnings("deprecation")
         OfflinePlayer player = Bukkit.getOfflinePlayer(name);
         if (player.isOnline()){
@@ -279,12 +262,14 @@ public class EcoCommands implements TabExecutor{
         if (player.hasPlayedBefore()){
             return player;
         }
-        sender.sendMessage(plugin.getLang().getFrom("error.player_not_found",sender.getLocale()));
+        sender.sendMessage(plugin.getLang().getFrom("error.player_not_found","EN_US"));
         return null;
     }
     private String getMsg(String key,Player p){
         return plugin.getLang().getFrom(key, p.getLocale());
     }
+
+    //#region help
     private void helpCommand(Player p, String[] args){
         p.sendMessage("§6/eco balance [player]");
         p.sendMessage("§6/eco add <player> <amount>");

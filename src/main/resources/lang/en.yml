@@ -7,9 +7,7 @@ balance_other: "&aPlayer {player} has {balance}: "
 server_balance: "&aServer balance is {balance}: "
 
 economy:
-    add_player: "&aHas been added {amount} to {player} from server bank!"
     add_player_notify: "&aYou have received {amount} from the server bank!"
-    take_player: "&cHas been taked {amount} from {player} to server bank!"
     take_player_notify: "&cYou have been taken {amount} from your balance to the server bank!"
     set_player: "&aPlayer {player} balance was set to {amount}!"
     set_player_notify: "&aYour balance was set to {amount}!"

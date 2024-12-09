@@ -6,6 +6,8 @@ com\ar\askgaming\realisticeconomy\Economy\EconomyManager.class
 com\ar\askgaming\realisticeconomy\Commands\EcoCommands.class
 com\ar\askgaming\realisticeconomy\Auction\Auction.class
 com\ar\askgaming\realisticeconomy\Listeners\PlayerJoinListener.class
+com\ar\askgaming\realisticeconomy\Listeners\PlayerJoinListener$1.class
+com\ar\askgaming\realisticeconomy\Utilities\TimeManager.class
 com\ar\askgaming\realisticeconomy\Data\DatabaseManager.class
 com\ar\askgaming\realisticeconomy\Commands\AuctionCommands.class
 com\ar\askgaming\realisticeconomy\Lotery\Lotery.class
