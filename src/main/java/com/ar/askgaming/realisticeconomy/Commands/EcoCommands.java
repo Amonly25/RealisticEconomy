@@ -92,6 +92,13 @@ public class EcoCommands implements TabExecutor{
             case "help":
                 helpCommand(p,args);    
                 break;
+            case "reset":
+                if (p.hasPermission("eco.admin")){
+                    resetCommand(p, args);
+                } else {
+                    p.sendMessage(plugin.getLang().getFrom("commands.no_perm", p.getLocale()));
+                }
+                break;
             default:
                 p.sendMessage("Error, use: /eco <balance|server|add|pay|take>");
                 break;
@@ -237,6 +244,32 @@ public class EcoCommands implements TabExecutor{
             }
             plugin.getEconomyLogger().log("Player " + p.getName() + " set " + args[1] + " to " + args[2]);
         } else p.sendMessage(getMsg("error.transaction",p));
+        
+    }
+    //#region reset
+    public void resetCommand(Player p, String[] args){
+
+        OfflinePlayer player = checkPlayer(p, args[1]);
+        if (player == null){
+            return;
+        }
+
+        if (!warn.contains(p)){
+            p.sendMessage("§cWarning: This command will set the balance of the player without bank transaction.");
+            p.sendMessage("§cThis action can disturb the economy of the server, use with caution.");
+            p.sendMessage("§cIf you are sure, use the command again.");
+            warn.add(p);
+            return;
+        }
+        warn.remove(p);
+
+        PlayerData pd = plugin.getDatabase().loadPlayerData(player.getUniqueId());
+        pd.setBalance(0);
+        pd.setBankBalance(0);
+        pd.setDebt(0);
+        pd.setSeized_account(false);
+        pd.save();
+        p.sendMessage("§aPlayer " + args[1] + " has been reset.");
         
     }
     //#region top

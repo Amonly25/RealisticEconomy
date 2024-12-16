@@ -28,8 +28,8 @@ public class TimeManager {
         if (timeDifferenceInDays > 0) {
             // Calcular el interés sobre el saldo bancario del jugador
             double balance = pd.getBankBalance();
-            double interestRate = plugin.getEconomyManager().getSavingsInterest()/100;
-            double deposit = balance * interestRate * timeDifferenceInDays;
+            double interestRate = plugin.getEconomyManager().getSavingsInterest();
+            double deposit = (balance * interestRate /100) * timeDifferenceInDays;
             deposit = EconomyManager.formatDouble(deposit);
             // Verificar si el banco del servidor tiene suficiente saldo para pagar el interés
             if (plugin.getServerBank().getBalance() < deposit) {
@@ -48,7 +48,7 @@ public class TimeManager {
             double loan = pd.getDebt();
             double interestRateLoan = plugin.getEconomyManager().getLoanInterest()/100;
             double interest = loan * interestRateLoan * timeDifferenceInDays;
-    
+            interest = EconomyManager.formatDouble(interest);
             // Si hay interés sobre la deuda
             if (interest > 0) {
                 p.sendMessage(plugin.getLang().getFrom("bank.loan_interest", p.getLocale()));

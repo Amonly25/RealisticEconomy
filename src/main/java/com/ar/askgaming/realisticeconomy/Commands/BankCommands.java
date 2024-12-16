@@ -108,7 +108,7 @@ public class BankCommands implements TabExecutor{
         p.sendMessage(plugin.getLang().getFrom("bank.info.savings_interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getSavingsInterest())));
         p.sendMessage("");
         
-        double savingsInterest = pd.getBalance() * plugin.getEconomyManager().getSavingsInterest() / 100;
+        double savingsInterest = pd.getBankBalance() * plugin.getEconomyManager().getSavingsInterest() / 100;
 
         String formattedNumber = String.format("%.4f", savingsInterest);
         p.sendMessage(plugin.getLang().getFrom("bank.info.balance", p.getLocale()).replace("{value}", String.valueOf(pd.getBankBalance())).replace("{interest}", formattedNumber));
