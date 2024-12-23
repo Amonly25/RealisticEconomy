@@ -103,7 +103,6 @@ public class BankCommands implements TabExecutor{
     }
     //#region info
     private void showBankInfo(Player p, PlayerData pd) {
-        p.sendMessage(plugin.getLang().getFrom("bank.info.inflation", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getInflation())));
         p.sendMessage(plugin.getLang().getFrom("bank.info.interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getLoanInterest())));
         p.sendMessage(plugin.getLang().getFrom("bank.info.savings_interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getSavingsInterest())));
         p.sendMessage("");

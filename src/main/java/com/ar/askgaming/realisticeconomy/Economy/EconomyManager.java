@@ -5,6 +5,8 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
@@ -35,19 +37,29 @@ public class EconomyManager {
         this.savingsInterest = plugin.getConfig().getDouble("savings_interest_per_day", 0.0833);
         this.database = plugin.getDatabase();
 
-        calculateInfation();
+        calculateInflation();
     }
-    public double calculateInfation() {
+    public void calculateInflation() {
         double inflation = 0.0;
-        double balance = getBalance();
+        double serverBalance = plugin.getServerBank().getBalance();
+        double playerBalances = getPlayerBalances();
         double inicialBalance = getInicialBalance();
-        if (balance > inicialBalance) {
-            inflation = (balance - inicialBalance) / inicialBalance;
+        
+        if (serverBalance > inicialBalance) {
+            inflation = (serverBalance + playerBalances - inicialBalance) / inicialBalance;
         }
+    
         setInflation(inflation);
-        return inflation;
     }
-
+    
+    public double getPlayerBalances(){
+        double total = 0.0;
+        HashMap<String, Double> balances = plugin.getDatabase().getBalances();
+        for (String key : balances.keySet()) {
+            total += balances.get(key);
+        }
+        return total;
+    }
     //#region createPlayerAccount
     public PlayerData createPlayerAccount(UUID uuid) {
         String sql;
@@ -139,5 +151,10 @@ public class EconomyManager {
         } else {
             return number;
         }
+    }
+    public static String format(double number) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String formattedDecimalNumber = decimalFormat.format(number);
+        return formattedDecimalNumber;
     }
 }

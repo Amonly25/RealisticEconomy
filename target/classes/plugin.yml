@@ -8,7 +8,7 @@ commands:
   eco:
     description: Main command for RealisticEconomy
     usage: /eco <subcommand>
-    aliases: [economy, money]
+    aliases: [economy, money,bal,balance]
     permission: eco.user
   bank:
     description: Main command for RealisticEconomy bank

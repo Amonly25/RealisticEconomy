@@ -24,6 +24,7 @@ bank:
     seized_account: "&cYour account is seized by the bank, you have to pay until you have less than 5000."
     info:
         inflation: "&eInflation: {value}%"
+        players: "&ePlayers total balance: {value}"
         interest: "&eInterest: {value}%"
         savings_interest: "&eSavings interest: {value}%"
         balance: "&2Bank balance: {value} - Earn {interest} per day."

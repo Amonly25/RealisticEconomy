@@ -26,7 +26,7 @@ public class EcoCommands implements TabExecutor{
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1){
-            return List.of("balance","add","take","pay","server","top");
+            return List.of("balance","add","take","pay","server","top","info");
 
         } else return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
     }
@@ -92,6 +92,9 @@ public class EcoCommands implements TabExecutor{
             case "help":
                 helpCommand(p,args);    
                 break;
+            case "info":
+                showEcoInfo(p, args);
+                break;
             case "reset":
                 if (p.hasPermission("eco.admin")){
                     resetCommand(p, args);
@@ -100,7 +103,7 @@ public class EcoCommands implements TabExecutor{
                 }
                 break;
             default:
-                p.sendMessage("Error, use: /eco <balance|server|add|pay|take>");
+                helpCommand(p, args);
                 break;
         }
         return true;
@@ -149,7 +152,7 @@ public class EcoCommands implements TabExecutor{
             }
             double balance = plugin.getEconomyService().getBalance(player.getUniqueId());
             
-            p.sendMessage(plugin.getLang().getFrom("balance_other", p.getLocale()).replace("{balance}", balance+"").replace("{player}", args[1]));
+            p.sendMessage(plugin.getLang().getFrom("balance_other", p.getLocale()).replace("{balance}", EconomyManager.format(balance)).replace("{player}", args[1]));
             return;
         }
         PlayerData playerData = plugin.getDatabase().loadPlayerData(p.getUniqueId());
@@ -310,5 +313,18 @@ public class EcoCommands implements TabExecutor{
         p.sendMessage("§6/eco pay <player> <amount>");
         p.sendMessage("§6/eco server");
         p.sendMessage("§6/eco top");
+    }
+    //#region info
+    private void showEcoInfo(Player p, String[] args){ 
+        double d = plugin.getServerBank().getBalance();
+        p.sendMessage(plugin.getLang().getFrom("server_balance", p.getLocale()).replace("{balance}", EconomyManager.format(d)));
+
+        double players = plugin.getEconomyManager().getPlayerBalances();
+        p.sendMessage(plugin.getLang().getFrom("bank.info.players", p.getLocale()).replace("{value}", EconomyManager.format(players)));
+
+        String inf = String.valueOf(plugin.getEconomyManager().getInflation());
+        p.sendMessage(plugin.getLang().getFrom("bank.info.inflation", p.getLocale()).replace("{value}", inf));
+        
+
     }
 }

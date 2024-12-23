@@ -65,9 +65,10 @@ public class RealisticEconomy extends JavaPlugin{
         
         langHandler = new LangManager(this);
         
-        economyManager = new EconomyManager(this);
         economyService = new EconomyService(this);
         serverBank = new BankTransactions(this);
+        
+        economyManager = new EconomyManager(this);
         loteryManager = new LoteryManager(this);
         auctionManager = new AuctionManager(this);
         timeManager = new TimeManager(this);
