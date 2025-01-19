@@ -45,9 +45,7 @@ public class EconomyManager {
         double playerBalances = getPlayerBalances();
         double inicialBalance = getInicialBalance();
         
-        if (serverBalance > inicialBalance) {
-            inflation = (serverBalance + playerBalances - inicialBalance) / inicialBalance;
-        }
+        inflation = ((serverBalance + playerBalances - inicialBalance) / inicialBalance) * 100;
     
         setInflation(inflation);
     }

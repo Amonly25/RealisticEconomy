@@ -131,6 +131,11 @@ public class EcoCommands implements TabExecutor{
             p.sendMessage(getMsg("error.invalid_amount", p));
             return;
         }
+        PlayerData pd = plugin.getDatabase().loadPlayerData(p.getUniqueId());
+        if (pd.isSeizedAccount()) {
+            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+            return;
+        }
         d = round(d);
         boolean transaction = plugin.getEconomyService().playerPayPlayer(p.getUniqueId(), player.getUniqueId(), d);
         if (transaction){
@@ -283,7 +288,7 @@ public class EcoCommands implements TabExecutor{
         HashMap<String, Double> balances = plugin.getDatabase().getBalances();
         balances.entrySet().stream().sorted((e1,e2) -> e2.getValue().compareTo(e1.getValue())).forEach(e -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(e.getKey()));
-            list.add(player.getName() + " - " + e.getValue());
+            list.add(player.getName() + " - " + EconomyManager.format(e.getValue()));
         });
 
         plugin.getUtilityMethods().listToPage(list, args, p);
@@ -322,7 +327,8 @@ public class EcoCommands implements TabExecutor{
         double players = plugin.getEconomyManager().getPlayerBalances();
         p.sendMessage(plugin.getLang().getFrom("bank.info.players", p.getLocale()).replace("{value}", EconomyManager.format(players)));
 
-        String inf = String.valueOf(plugin.getEconomyManager().getInflation());
+        plugin.getEconomyManager().calculateInflation();
+        String inf = EconomyManager.format(plugin.getEconomyManager().getInflation());
         p.sendMessage(plugin.getLang().getFrom("bank.info.inflation", p.getLocale()).replace("{value}", inf));
         
 

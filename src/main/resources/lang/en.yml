@@ -21,7 +21,9 @@ bank:
     interest: "&6Bank has paid you {amount} interest.!"
     loan: "&6You have taken a loan of {amount} from the bank!"
     loan_interest: "&6You have to pay {amount} interest for your loan!"
-    seized_account: "&cYour account is seized by the bank, you have to pay until you have less than 5000."
+    seized_account: "&cYour account is seized by the bank, you have to pay until you have less than 4000."
+    unseized_account: "&aYour account is unseized by the bank, you can use it again."
+    playtime: "&cYou need to play at least {hours} hours to take a loan!"
     info:
         inflation: "&eInflation: {value}%"
         players: "&ePlayers total balance: {value}"

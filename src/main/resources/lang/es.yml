@@ -21,7 +21,9 @@ bank:
     interest: "&6El banco te ha pagado {amount} de interés."
     loan: "&6¡Has tomado un préstamo de {amount} del banco!"
     loan_interest: "&6¡Tienes que pagar {amount} de interés por tu préstamo!"
-    seized_account: "&cTu cuenta ha sido embargada por el banco, tienes que pagar hasta que tengas menos de 5000."
+    seized_account: "&cTu cuenta ha sido embargada por el banco, tienes que pagar hasta que tengas menos de 4000."
+    unseized_account: "&aTu cuenta ha sido desembargada por el banco, puedes usarla de nuevo."
+    playtime: "&c¡Necesitas jugar al menos {hours} horas para tomar un préstamo!"
     info:
         inflation: "&eInflación: {value}%"
         players: "&eSaldo total de los jugadores: {value}"

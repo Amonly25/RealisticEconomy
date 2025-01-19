@@ -17,13 +17,18 @@ public class TimeManager {
         
         // Cargar los datos del jugador desde la base de datos
         PlayerData pd = plugin.getDatabase().loadPlayerData(p.getUniqueId());
+
+        if (pd.isSeizedAccount()) {
+            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+            return;
+        }
     
         // Obtener el tiempo de la última conexión y el tiempo actual
         long lastConnected = pd.getLastConnected();
         long currentTime = System.currentTimeMillis();
         long timeDifference = currentTime - lastConnected;
         long timeDifferenceInDays = timeDifference / (1000 * 60 * 60 * 24); // Convertir la diferencia de tiempo a días
-    
+
         // Si ha pasado al menos un día desde la última conexión
         if (timeDifferenceInDays > 0) {
             // Calcular el interés sobre el saldo bancario del jugador
@@ -36,14 +41,17 @@ public class TimeManager {
                 deposit = plugin.getServerBank().getBalance();
                 p.sendMessage(plugin.getLang().getFrom("bank.no_bank_enought", p.getLocale()));
             }
-    
+            
             // Transferir el interés al jugador
-            if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), deposit)) {
-                p.sendMessage(plugin.getLang().getFrom("bank.interest", p.getLocale()).replace("{amount}", String.valueOf(deposit)));
-            } else {
-                p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+            if (deposit > 0) {
+                if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), deposit)) {
+                    p.sendMessage(plugin.getLang().getFrom("bank.interest", p.getLocale()).replace("{amount}", String.valueOf(deposit)));
+                    plugin.getEconomyLogger().log("Interest of " + deposit + " has been paid to " + p.getName());
+                } else {
+                    p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+                }
             }
-    
+            
             // Calcular el interés sobre la deuda del jugador
             double loan = pd.getDebt();
             double interestRateLoan = plugin.getEconomyManager().getLoanInterest()/100;
@@ -51,10 +59,12 @@ public class TimeManager {
             interest = EconomyManager.formatDouble(interest);
             // Si hay interés sobre la deuda
             if (interest > 0) {
+                plugin.getEconomyLogger().log("Interest of " + interest + " has been added to " + p.getName() + "'s debt");
                 p.sendMessage(plugin.getLang().getFrom("bank.loan_interest", p.getLocale()));
                 pd.setDebt(interest + loan); // Actualizar la deuda del jugador
                 pd.checkSeizedAccount(); // Verificar si la cuenta del jugador debe ser embargada
                 if (pd.isSeizedAccount()) {
+                    plugin.getLogger().info("Account of " + p.getName() + " has been seized");
                     p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
                 }
                 pd.save(); // Guardar los datos del jugador

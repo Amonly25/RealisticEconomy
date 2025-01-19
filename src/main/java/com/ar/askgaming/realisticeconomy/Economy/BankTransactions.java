@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import org.bukkit.OfflinePlayer;
+
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
 import com.ar.askgaming.realisticeconomy.Data.PlayerData;
@@ -51,7 +53,7 @@ public class BankTransactions {
         if (playerData == null) {
             return false;
         }
-    
+        
         playerData.setBalance(playerData.getBalance() + amount);
         boolean step = playerData.save();
         if (!step) {
@@ -66,7 +68,8 @@ public class BankTransactions {
             if (!saveServerBankBalance(serverBalance - amount, serverBalance, conn)) {
                 return false;
             }
-            plugin.getEconomyLogger().log("Withdrawn " + amount + " from server bank to player " + playerUUID);
+            OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerUUID);
+            plugin.getEconomyLogger().log("Withdrawn " + amount + " from server bank to " + player.getName());
             conn.commit(); // Confirmar la transacción
             return true;
     
@@ -108,9 +111,9 @@ public class BankTransactions {
             if (!saveServerBankBalance(getBalance() + amount, getBalance(), conn)) {
                 return false;
             }
-    
+            OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerUUID);
+            plugin.getEconomyLogger().log("Deposited " + amount + " from " + player.getName() + " to server bank");
             conn.commit(); // Confirmar la transacción
-            plugin.getEconomyLogger().log("Deposited " + amount + " from player " + playerUUID + " to server bank");
             return true;
     
         } catch (SQLException e) {

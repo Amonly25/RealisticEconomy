@@ -3,6 +3,7 @@ package com.ar.askgaming.realisticeconomy.Commands;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -124,10 +125,20 @@ public class BankCommands implements TabExecutor{
             p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
         }
-        if (pd.getDebt() >= plugin.getEconomyManager().getDebtLimit()) {
+        double limit = plugin.getEconomyManager().getDebtLimit();
+        if (pd.getDebt() >= limit || amount > limit - pd.getDebt()) {
             p.sendMessage(plugin.getLang().getFrom("bank.debt_limit", p.getLocale()));
             return;
         }
+        int playtime = plugin.getConfig().getInt("playtime_minimum_for_loan",6);
+        int total_minutes = p.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60;
+        int hours = total_minutes / 60;
+        if (hours < playtime){
+            p.sendMessage(plugin.getLang().getFrom("bank.playtime", p.getLocale()).replace("{hours}", playtime+""));
+            return;
+
+        }
+
         if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), amount)) {
             pd.setDebt(pd.getDebt() + amount);
             pd.save();
@@ -140,10 +151,7 @@ public class BankCommands implements TabExecutor{
     }
     //#region pay
     private void payDebt(Player p, PlayerData pd, double amount) {
-        if (pd.isSeizedAccount()) {
-            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
-            return;
-        }
+
         if (amount <= 0 || amount > pd.getBalance() || amount > pd.getDebt()) {
             p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
@@ -153,6 +161,12 @@ public class BankCommands implements TabExecutor{
             pd.save();
             plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + amount + " of debt");
             p.sendMessage(plugin.getLang().getFrom("bank.pay_debt", p.getLocale()).replace("{amount}", String.valueOf(amount)));
+
+            if (pd.getDebt() < plugin.getConfig().getDouble("min_debt_to_remove_seized_when_pay", 4000)) {
+                pd.setSeized_account(false);
+                pd.save();
+                p.sendMessage(plugin.getLang().getFrom("bank.unseized_account", p.getLocale()));
+            }
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
             //plugin.getEconomyLogger().log("Player " + p.getName() + " tried to pay " + amount + " of debt but the transaction failed");
@@ -160,6 +174,10 @@ public class BankCommands implements TabExecutor{
     }
     //#region deposit
     private void depositToBank(Player p, PlayerData pd, double amount) {
+        if (pd.isSeizedAccount()) {
+            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+            return;
+        }
         if (amount <= 0 || amount > pd.getBalance()) {
             p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
             return;
