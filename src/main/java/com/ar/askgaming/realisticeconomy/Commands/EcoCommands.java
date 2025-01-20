@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Statistic;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -120,6 +121,15 @@ public class EcoCommands implements TabExecutor{
             return;
         }
 
+        int playtime = plugin.getConfig().getInt("playtime_minimum_for_player_pay",6);
+        int total_minutes = p.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60;
+        int hours = total_minutes / 60;
+        if (hours < playtime){
+            p.sendMessage(plugin.getLang().getFrom("bank.playtime", p.getLocale()).replace("{hours}", playtime+""));
+            return;
+
+        }
+
         OfflinePlayer player = checkPlayer(p, args[1]); 
         if (player == null){
             return;
@@ -136,6 +146,7 @@ public class EcoCommands implements TabExecutor{
             p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
             return;
         }
+        
         d = round(d);
         boolean transaction = plugin.getEconomyService().playerPayPlayer(p.getUniqueId(), player.getUniqueId(), d);
         if (transaction){

@@ -18,6 +18,7 @@ min_debt_to_remove_seized_when_pay: 4000
 loan_interest_per_day: 0.1666
 savings_interest_per_day: 0.0833
 playtime_minimum_for_loan: 6 #hours
+playtime_minimum_for_player_pay: 6 #hours
 
 
 
