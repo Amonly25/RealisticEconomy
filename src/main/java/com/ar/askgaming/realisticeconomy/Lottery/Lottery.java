@@ -1,12 +1,14 @@
-package com.ar.askgaming.realisticeconomy.Lotery;
+package com.ar.askgaming.realisticeconomy.Lottery;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public class Lotery implements ConfigurationSerializable{
+public class Lottery implements ConfigurationSerializable{
     
     private String name;
     private double ticketPrice;
@@ -15,17 +17,17 @@ public class Lotery implements ConfigurationSerializable{
     private int winningNumber;
     private double jackpot;
 
-    private HashMap<UUID, Integer> tickets = new HashMap<>();
+    private HashMap<UUID, List<Integer>> tickets = new HashMap<>();
 
     private boolean isActive;
 
-    public Lotery(String name, int ticketPrice, int numberLimit) {
+    public Lottery(String name, int ticketPrice, int numberLimit, Double jackpot) {
         this.name = name;
         this.ticketPrice = ticketPrice;
         this.numberLimit = numberLimit;
         this.ticketsSold = 0;
         this.isActive = true;
-        this.jackpot = 0;
+        this.jackpot = jackpot;
     }
 
     public String getName() {
@@ -74,7 +76,7 @@ public class Lotery implements ConfigurationSerializable{
     public void setWinningNumber(int winningNumber) {
         this.winningNumber = winningNumber;
     }   
-    public HashMap<UUID, Integer> getTickets() {
+    public HashMap<UUID, List<Integer>> getTickets() {
         return tickets;
     }
     public double getJackpot() {
@@ -84,13 +86,20 @@ public class Lotery implements ConfigurationSerializable{
     public void setJackpot(double jacjpot) {
         this.jackpot = jacjpot;
     }
-
+    //#region add
     public void addTicket(UUID player, int number) {
-        tickets.put(player, number);
+        List<Integer> playerTickets = tickets.get(player);
+        if (playerTickets == null) {
+            playerTickets = new ArrayList<>();
+            tickets.put(player, playerTickets);
+        }
+        playerTickets.add(number);
+        tickets.put(player, playerTickets);
+
         ticketsSold++;
         jackpot += ticketPrice;
     }
-    public Lotery(Map<String, Object> map){
+    public Lottery(Map<String, Object> map){
         this.name = (String) map.get("name");
         this.ticketPrice = (double) map.get("ticketPrice");
         this.ticketsSold = (int) map.get("ticketsSold");
@@ -98,7 +107,14 @@ public class Lotery implements ConfigurationSerializable{
         this.winningNumber = (int) map.get("winningNumber");
         this.jackpot = (double) map.get("jackpot");
         this.isActive = (boolean) map.get("isActive");
-        this.tickets = (HashMap<UUID, Integer>) map.get("tickets");
+        if (map.get("tickets") instanceof HashMap) {
+            HashMap<String, List<Integer>> tickets = (HashMap<String, List<Integer>>) map.get("tickets");
+            for (String player : tickets.keySet()) {
+                this.tickets.put(UUID.fromString(player), tickets.get(player));
+            }
+            
+        }
+
     }
 
     //#region Serialization
@@ -112,6 +128,11 @@ public class Lotery implements ConfigurationSerializable{
         map.put("winningNumber", winningNumber);
         map.put("jackpot", jackpot);
         map.put("isActive", isActive);
+        
+        HashMap<String, List<Integer>> tickets = new HashMap<>();
+        for (UUID player : this.tickets.keySet()) {
+            tickets.put(player.toString(), this.tickets.get(player));
+        }
         map.put("tickets", tickets);
         return map;
     }

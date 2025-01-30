@@ -9,7 +9,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.ar.askgaming.realisticeconomy.Commands.BankCommands;
 import com.ar.askgaming.realisticeconomy.Commands.EcoCommands;
-import com.ar.askgaming.realisticeconomy.Commands.LoteryCommands;
 import com.ar.askgaming.realisticeconomy.Commands.TokenCommands;
 import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
 import com.ar.askgaming.realisticeconomy.Data.LangManager;
@@ -18,8 +17,9 @@ import com.ar.askgaming.realisticeconomy.Economy.EconomyLogger;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyManager;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyService;
 import com.ar.askgaming.realisticeconomy.Listeners.PlayerJoinListener;
-import com.ar.askgaming.realisticeconomy.Lotery.Lotery;
-import com.ar.askgaming.realisticeconomy.Lotery.LoteryManager;
+import com.ar.askgaming.realisticeconomy.Lottery.Lottery;
+import com.ar.askgaming.realisticeconomy.Lottery.LotteryCommands;
+import com.ar.askgaming.realisticeconomy.Lottery.LotteryManager;
 import com.ar.askgaming.realisticeconomy.Utilities.TimeManager;
 import com.ar.askgaming.realisticeconomy.Utilities.UtilityMethods;
 import com.ar.askgaming.realisticeconomy.Utilities.VaultHook;
@@ -33,7 +33,7 @@ public class RealisticEconomy extends JavaPlugin{
     private EconomyService economyService;
     private BankTransactions serverBank;
     private UtilityMethods utilityMethods;
-    private LoteryManager loteryManager;
+    private LotteryManager loteryManager;
     private EconomyManager economyManager;
     private TimeManager timeManager;
     private DatabaseManager database;
@@ -47,7 +47,7 @@ public class RealisticEconomy extends JavaPlugin{
 
         database = new DatabaseManager(this);
 
-        ConfigurationSerialization.registerClass(Lotery.class,"Lotery");
+        ConfigurationSerialization.registerClass(Lottery.class,"Lottery");
 
         try (Connection conn = database.connect()) {
             getLogger().info("Connected to database.");
@@ -64,7 +64,7 @@ public class RealisticEconomy extends JavaPlugin{
         serverBank = new BankTransactions(this);
         
         economyManager = new EconomyManager(this);
-        loteryManager = new LoteryManager(this);
+        loteryManager = new LotteryManager(this);
         timeManager = new TimeManager(this);
 
         serverLang = getConfig().getString("server_lang", "en");
@@ -77,14 +77,14 @@ public class RealisticEconomy extends JavaPlugin{
 
         getServer().getPluginCommand("eco").setExecutor(new EcoCommands(this));
         getServer().getPluginCommand("bank").setExecutor(new BankCommands(this));
-        getServer().getPluginCommand("lotery").setExecutor(new LoteryCommands(this));
+        getServer().getPluginCommand("lottery").setExecutor(new LotteryCommands(this));
         getServer().getPluginCommand("tokens").setExecutor(new TokenCommands(this));
 
         if (setupVault()) {
-            getLogger().info("EconomyPlugin found and hooked into Vault.");
+            getLogger().info("Hooked into Vault!");
         } else {
-            getLogger().severe("Vault not found! Disabling plugin.");
-            getServer().getPluginManager().disablePlugin(this);
+            getLogger().severe("Vault not found!");
+            //getServer().getPluginManager().disablePlugin(this);
         }
     }
 
@@ -92,10 +92,10 @@ public class RealisticEconomy extends JavaPlugin{
         //sqlDatabase.close();
     }
     private boolean setupVault() {
-        vaultHook = new VaultHook(this);
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
+        vaultHook = new VaultHook(this);
         getServer().getServicesManager().register(Economy.class, vaultHook, this, ServicePriority.Normal);
         return true;
     }
@@ -121,7 +121,7 @@ public class RealisticEconomy extends JavaPlugin{
         return utilityMethods;
     }
 
-    public LoteryManager getLoteryManager() {
+    public LotteryManager getLoteryManager() {
         return loteryManager;
     }
 

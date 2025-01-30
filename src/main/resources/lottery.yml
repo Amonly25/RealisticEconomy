@@ -1,0 +1,10 @@
+weekly:
+  ==: com.ar.askgaming.realisticeconomy.Lottery.Lottery
+  ticketsSold: 0
+  winningNumber: 0
+  tickets: {}
+  ticketPrice: 10.0
+  jackpot: 100.0
+  name: weekly
+  numberLimit: 50
+  isActive: true

@@ -14,10 +14,11 @@ commands:
     description: Main command for RealisticEconomy bank
     usage: /bank <subcommand>
     permission: eco.user
-  lotery:
+  lottery:
     description: Main command for RealisticEconomy lotery
     usage: /lotery <subcommand>
     permission: eco.user
+    aliases: [lot]
   tokens:
     description: Main command for RealisticEconomy tokens
     usage: /tokens <subcommand>

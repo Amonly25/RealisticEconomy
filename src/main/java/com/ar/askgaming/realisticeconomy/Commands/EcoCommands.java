@@ -103,6 +103,14 @@ public class EcoCommands implements TabExecutor{
                     p.sendMessage(plugin.getLang().getFrom("commands.no_perm", p.getLocale()));
                 }
                 break;
+            case "reload":
+                if (p.hasPermission("eco.admin")){
+                    plugin.reloadConfig();
+                    p.sendMessage(plugin.getLang().getFrom("commands.reload", p.getLocale()));
+                } else {
+                    p.sendMessage(plugin.getLang().getFrom("commands.no_perm", p.getLocale()));
+                }
+                break;
             default:
                 helpCommand(p, args);
                 break;

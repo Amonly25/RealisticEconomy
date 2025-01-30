@@ -37,25 +37,26 @@ token:
     receive: "&6{player} has paid you {amount} tokens."
 
 lottery:
-    create: "&aLottery {name} has been created!"
+    created: "&aLottery {name} has been created!"
     remove: "&cLottery {name} has been removed!"   
     drawn: "&aThe Lottery {name} has been drawn!"
+    jackpot: "&aThe new jackpot is: {amount}!"
     number: "&aThe number is: {number}!"
     no_winners: "&cThere is no winner this time!"
     winners: "&aThe winners are: {list}!"
-    reward: "&aThe reward is: {amount}!"
+    reward: "&aThe reward is: {amount}! each"
     won: "&aYou have won {amount}!"
-    taxes: "&cYou have to pay taxes: {taxes}!"
+    taxes: "&cHas been taken {taxes} from taxes!"
     no_active: "&cThis lottery is not active!"
     number_limit: "&cThe number must be between 1 and {number}"
-    buy: "&aYou have bought a ticker for number {number}"
-    player_buy: "&aA player has bought a ticker for lottery {name}"
+    buy: "&aYou have bought a ticket for number {number}"
+    player_buy: "&aA player has bought a ticket for lottery {name}"
     reset: "&aThe lottery has been reset, you can buy tickets again!"
     info:
         name: "&7Name: {name}"
         jackpot: "&7Jackpot: {jackpot}"
         ticket_price: "&7Price: {price}"
-        number_limit: "&7Numbers: {numbers}"
+        number_limit: "&7Numbers Limit: {numbers}"
         tickets_sold: "&7Tickets sold: {sold}"
         active: "&7Active: {active}"
 
@@ -71,6 +72,7 @@ transactions:
 
 commands:
     no_perm: "&cYou don't have permission to do that!"
+    reload: "&aRealisticEconomy has been reloaded!"
 
 misc:
     pages: "&6Balance top: pages "

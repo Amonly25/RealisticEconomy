@@ -1,4 +1,4 @@
-package com.ar.askgaming.realisticeconomy.Commands;
+package com.ar.askgaming.realisticeconomy.Lottery;
 
 import java.util.List;
 
@@ -9,10 +9,10 @@ import org.bukkit.entity.Player;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
-public class LoteryCommands implements TabExecutor {
+public class LotteryCommands implements TabExecutor {
 
     private RealisticEconomy plugin;
-    public LoteryCommands(RealisticEconomy main) {
+    public LotteryCommands(RealisticEconomy main) {
         plugin = main;
     }
 
@@ -20,13 +20,18 @@ public class LoteryCommands implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
             return List.of("buy", "info", "draw", "create", "reset", "delete");
-        } else return null;
+        } 
+        if (args.length == 2){
+            return plugin.getLoteryManager().getLoteryList().keySet().stream().toList();
+        }
+        
+        return null;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
        if (args.length == 0) {
-           sender.sendMessage("Usage: /lotery <buy/info/draw>");
+           sender.sendMessage("Usage: /lotery <buy/info/draw/create/reset/delete>");
            return true;
        }
        if (!(sender instanceof Player)) {
@@ -35,16 +40,10 @@ public class LoteryCommands implements TabExecutor {
        }
        Player player = (Player) sender;
 
-       if (plugin.getLoteryManager().isMaintenance()) {
-           player.sendMessage("§cLotery is in maintenance mode.");
-           return true;
-       }
-
-
-       switch (args[0].toLowerCase()) {
+        switch (args[0].toLowerCase()) {
             case "buy":
                 if (args.length < 3) {
-                    sender.sendMessage("Usage: /lotery buy <lotery_name> <number>");
+                    sender.sendMessage("Usage: /lottery buy <lotery_name> <number>");
                     return true;
                 }
                 String loteryName = args[1];
@@ -60,8 +59,13 @@ public class LoteryCommands implements TabExecutor {
 
                 break;
             case "reset":
+                 if (!player.hasPermission("eco.admin")){
+                    player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                    return true;
+                 }
+
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /lotery reset <lotery_name>");
+                    sender.sendMessage("Usage: /lottery reset <lotery_name>");
                     return true;
                 }
                 String loteryName4 = args[1];
@@ -70,18 +74,26 @@ public class LoteryCommands implements TabExecutor {
                 break;
             case "delete":
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /lotery delete <lotery_name>");
+                    sender.sendMessage("Usage: /lottery delete <lotery_name>");
                     return true;
                 }
+                if (!player.hasPermission("eco.admin")){
+                    player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                    return true;
+                 }
                 String loteryName5 = args[1];
                 // Delete lotery
                 plugin.getLoteryManager().deleteLotery(loteryName5);
                 break;
             case "create":
                 if (args.length < 3) {
-                    sender.sendMessage("Usage: /lotery create <lotery_name> <price>");
+                    sender.sendMessage("Usage: /lottery create <lotery_name> <price>");
                     return true;
                 }
+                if (!player.hasPermission("eco.admin")){
+                    player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                    return true;
+                 }
                 String loteryName1 = args[1];
                 int price;
                 try {
@@ -90,12 +102,22 @@ public class LoteryCommands implements TabExecutor {
                     sender.sendMessage("Invalid price.");
                     return true;
                 }
+
+                if (plugin.getLoteryManager().getLoteryList().containsKey(loteryName1.toLowerCase())) {
+                    sender.sendMessage("Lottery already exists.");
+                    return true;
+                }
+
                 // Create lotery
-                plugin.getLoteryManager().createLotery(loteryName1, price, 50);
+                plugin.getLoteryManager().createLotery(loteryName1.toLowerCase(), price);
                 break;
             case "draw":
+            if (!player.hasPermission("eco.admin")){
+                player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                return true;
+             }
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /lotery draw <lotery_name>");
+                    sender.sendMessage("Usage: /lottery draw <lotery_name>");
                     return true;
                 }
                 String loteryName3 = args[1];
@@ -104,7 +126,7 @@ public class LoteryCommands implements TabExecutor {
                 break;
             case "info":
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /lotery info <lotery_name>");
+                    sender.sendMessage("Usage: /lottery info <lotery_name>");
                     return true;
                 }
                 String loteryName2 = args[1];
@@ -112,7 +134,7 @@ public class LoteryCommands implements TabExecutor {
                 plugin.getLoteryManager().getLoteryInfo(player, loteryName2);
                 break;
             default:
-                sender.sendMessage("Usage: /lotery <buy/info>");
+                sender.sendMessage("Usage: /lottery <buy/info/draw/create/reset/delete>");
                 break;
         }
         return true;
