@@ -7,9 +7,6 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.ar.askgaming.realisticeconomy.Auction.Auction;
-import com.ar.askgaming.realisticeconomy.Auction.AuctionManager;
-import com.ar.askgaming.realisticeconomy.Commands.AuctionCommands;
 import com.ar.askgaming.realisticeconomy.Commands.BankCommands;
 import com.ar.askgaming.realisticeconomy.Commands.EcoCommands;
 import com.ar.askgaming.realisticeconomy.Commands.LoteryCommands;
@@ -37,7 +34,6 @@ public class RealisticEconomy extends JavaPlugin{
     private BankTransactions serverBank;
     private UtilityMethods utilityMethods;
     private LoteryManager loteryManager;
-    private AuctionManager auctionManager;
     private EconomyManager economyManager;
     private TimeManager timeManager;
     private DatabaseManager database;
@@ -52,7 +48,6 @@ public class RealisticEconomy extends JavaPlugin{
         database = new DatabaseManager(this);
 
         ConfigurationSerialization.registerClass(Lotery.class,"Lotery");
-        ConfigurationSerialization.registerClass(Auction.class,"Auction");
 
         try (Connection conn = database.connect()) {
             getLogger().info("Connected to database.");
@@ -70,7 +65,6 @@ public class RealisticEconomy extends JavaPlugin{
         
         economyManager = new EconomyManager(this);
         loteryManager = new LoteryManager(this);
-        auctionManager = new AuctionManager(this);
         timeManager = new TimeManager(this);
 
         serverLang = getConfig().getString("server_lang", "en");
@@ -84,7 +78,6 @@ public class RealisticEconomy extends JavaPlugin{
         getServer().getPluginCommand("eco").setExecutor(new EcoCommands(this));
         getServer().getPluginCommand("bank").setExecutor(new BankCommands(this));
         getServer().getPluginCommand("lotery").setExecutor(new LoteryCommands(this));
-        getServer().getPluginCommand("reauction").setExecutor(new AuctionCommands(this));
         getServer().getPluginCommand("tokens").setExecutor(new TokenCommands(this));
 
         if (setupVault()) {
@@ -131,9 +124,7 @@ public class RealisticEconomy extends JavaPlugin{
     public LoteryManager getLoteryManager() {
         return loteryManager;
     }
-    public AuctionManager getAuctionManager() {
-        return auctionManager;
-    }
+
     public EconomyManager getEconomyManager() {
         return economyManager;
     }

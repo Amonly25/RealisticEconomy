@@ -18,10 +18,6 @@ commands:
     description: Main command for RealisticEconomy lotery
     usage: /lotery <subcommand>
     permission: eco.user
-  reauction:
-    description: Main command for RealisticEconomy reauction
-    usage: /reauction <subcommand>
-    permission: eco.user
   tokens:
     description: Main command for RealisticEconomy tokens
     usage: /tokens <subcommand>

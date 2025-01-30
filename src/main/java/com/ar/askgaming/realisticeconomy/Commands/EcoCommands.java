@@ -233,7 +233,7 @@ public class EcoCommands implements TabExecutor{
     }
     public void handleServerCommand(Player p, String[] args){
         double d = plugin.getServerBank().getBalance();
-        p.sendMessage(plugin.getLang().getFrom("server_balance", p.getLocale()).replace("{balance}", String.valueOf(d)));
+        p.sendMessage(plugin.getLang().getFrom("server_balance", p.getLocale()).replace("{balance}", EconomyManager.format(d)));
     }
     //#region set
     private List<Player> warn = new ArrayList<>();

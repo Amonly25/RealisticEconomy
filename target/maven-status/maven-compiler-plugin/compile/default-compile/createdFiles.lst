@@ -4,12 +4,10 @@ com\ar\askgaming\realisticeconomy\Commands\TokenCommands.class
 com\ar\askgaming\realisticeconomy\RealisticEconomy.class
 com\ar\askgaming\realisticeconomy\Economy\EconomyManager.class
 com\ar\askgaming\realisticeconomy\Commands\EcoCommands.class
-com\ar\askgaming\realisticeconomy\Auction\Auction.class
 com\ar\askgaming\realisticeconomy\Listeners\PlayerJoinListener.class
 com\ar\askgaming\realisticeconomy\Listeners\PlayerJoinListener$1.class
 com\ar\askgaming\realisticeconomy\Utilities\TimeManager.class
 com\ar\askgaming\realisticeconomy\Data\DatabaseManager.class
-com\ar\askgaming\realisticeconomy\Commands\AuctionCommands.class
 com\ar\askgaming\realisticeconomy\Lotery\Lotery.class
 com\ar\askgaming\realisticeconomy\Economy\Tokens.class
 com\ar\askgaming\realisticeconomy\Utilities\UtilityMethods.class
@@ -18,6 +16,5 @@ com\ar\askgaming\realisticeconomy\Economy\BankTransactions.class
 com\ar\askgaming\realisticeconomy\Commands\LoteryCommands.class
 com\ar\askgaming\realisticeconomy\Data\LangManager.class
 com\ar\askgaming\realisticeconomy\Economy\EconomyService.class
-com\ar\askgaming\realisticeconomy\Auction\AuctionManager.class
 com\ar\askgaming\realisticeconomy\Data\PlayerData.class
 com\ar\askgaming\realisticeconomy\Economy\EconomyLogger.class
