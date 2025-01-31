@@ -31,7 +31,7 @@ public class LotteryCommands implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
        if (args.length == 0) {
-           sender.sendMessage("Usage: /lotery <buy/info/draw/create/reset/delete>");
+           sender.sendMessage("Usage: /lottery <buy/info/draw/create/reset/delete>");
            return true;
        }
        if (!(sender instanceof Player)) {

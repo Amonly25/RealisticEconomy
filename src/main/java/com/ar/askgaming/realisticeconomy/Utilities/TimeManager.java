@@ -60,7 +60,7 @@ public class TimeManager {
             // Si hay interés sobre la deuda
             if (interest > 0) {
                 plugin.getEconomyLogger().log("Interest of " + interest + " has been added to " + p.getName() + "'s debt");
-                p.sendMessage(plugin.getLang().getFrom("bank.loan_interest", p.getLocale()));
+                p.sendMessage(plugin.getLang().getFrom("bank.loan_interest", p.getLocale()).replace("{amount}", interest + ""));
                 pd.setDebt(interest + loan); // Actualizar la deuda del jugador
                 pd.checkSeizedAccount(); // Verificar si la cuenta del jugador debe ser embargada
                 if (pd.isSeizedAccount()) {
