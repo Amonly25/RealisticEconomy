@@ -158,15 +158,16 @@ public class BankCommands implements TabExecutor{
         }
         if (plugin.getServerBank().depositFromPlayerToServer(p.getUniqueId(), amount)) {
             pd.setDebt(pd.getDebt() - amount);
-            pd.save();
             plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + amount + " of debt");
             p.sendMessage(plugin.getLang().getFrom("bank.pay_debt", p.getLocale()).replace("{amount}", String.valueOf(amount)));
 
-            if (pd.getDebt() < plugin.getConfig().getDouble("min_debt_to_remove_seized_when_pay", 4000)) {
-                pd.setSeized_account(false);
-                pd.save();
-                p.sendMessage(plugin.getLang().getFrom("bank.unseized_account", p.getLocale()));
+            if (pd.isSeizedAccount()){
+                if (pd.getDebt() < plugin.getConfig().getDouble("min_debt_to_remove_seized_when_pay", 4000)) {
+                    pd.setSeized_account(false);
+                    p.sendMessage(plugin.getLang().getFrom("bank.unseized_account", p.getLocale()));
+                }
             }
+            pd.save();
         } else {
             p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
             //plugin.getEconomyLogger().log("Player " + p.getName() + " tried to pay " + amount + " of debt but the transaction failed");
