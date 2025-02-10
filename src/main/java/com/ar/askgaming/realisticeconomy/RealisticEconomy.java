@@ -33,7 +33,7 @@ public class RealisticEconomy extends JavaPlugin{
     private EconomyService economyService;
     private BankTransactions serverBank;
     private UtilityMethods utilityMethods;
-    private LotteryManager loteryManager;
+    private LotteryManager lotteryManager;
     private EconomyManager economyManager;
     private TimeManager timeManager;
     private DatabaseManager database;
@@ -54,6 +54,7 @@ public class RealisticEconomy extends JavaPlugin{
             database.createTable();
             database.createServerBankTable();
         } catch (SQLException e) {
+            getLogger().severe("Failed to connect to the database. Disabling plugin...");
             getServer().getPluginManager().disablePlugin(this);
             e.printStackTrace();
         }
@@ -64,7 +65,7 @@ public class RealisticEconomy extends JavaPlugin{
         serverBank = new BankTransactions(this);
         
         economyManager = new EconomyManager(this);
-        loteryManager = new LotteryManager(this);
+        lotteryManager = new LotteryManager(this);
         timeManager = new TimeManager(this);
 
         serverLang = getConfig().getString("server_lang", "en");
@@ -84,12 +85,11 @@ public class RealisticEconomy extends JavaPlugin{
             getLogger().info("Hooked into Vault!");
         } else {
             getLogger().severe("Vault not found!");
-            //getServer().getPluginManager().disablePlugin(this);
         }
     }
 
     public void onDisable() {
-        //sqlDatabase.close();
+        
     }
     private boolean setupVault() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -122,7 +122,7 @@ public class RealisticEconomy extends JavaPlugin{
     }
 
     public LotteryManager getLoteryManager() {
-        return loteryManager;
+        return lotteryManager;
     }
 
     public EconomyManager getEconomyManager() {
