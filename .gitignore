@@ -1,6 +1,6 @@
-target/
-target/classes/com/ar/askgaming/realisticeconomy/listeners/PlayerJoinListener.class
-target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
 
-*.class
-*.lst
+target/classes
+target/test-classes
+target/maven-status
+target/maven-archiver
+target/generated-sources

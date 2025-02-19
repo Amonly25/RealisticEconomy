@@ -39,3 +39,4 @@ Vault methods supported
     has(OfflinePlayer arg0, double arg1)
     hasAccount(OfflinePlayer arg0)
     withdrawPlayer(OfflinePlayer arg0, double arg1)
+    
