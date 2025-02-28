@@ -27,6 +27,9 @@ public class LotteryCommands implements TabExecutor {
         
         return null;
     }
+    private String getLang(String path, Player p){
+        return plugin.getLang().getFrom(path, p);
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -60,7 +63,7 @@ public class LotteryCommands implements TabExecutor {
                 break;
             case "reset":
                  if (!player.hasPermission("eco.admin")){
-                    player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                    player.sendMessage(getLang("commands.no_perm", player));
                     return true;
                  }
 
@@ -78,7 +81,7 @@ public class LotteryCommands implements TabExecutor {
                     return true;
                 }
                 if (!player.hasPermission("eco.admin")){
-                    player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                    player.sendMessage(getLang("commands.no_perm", player));
                     return true;
                  }
                 String loteryName5 = args[1];
@@ -91,7 +94,7 @@ public class LotteryCommands implements TabExecutor {
                     return true;
                 }
                 if (!player.hasPermission("eco.admin")){
-                    player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                    player.sendMessage(getLang("commands.no_perm", player));
                     return true;
                  }
                 String loteryName1 = args[1];
@@ -113,7 +116,7 @@ public class LotteryCommands implements TabExecutor {
                 break;
             case "draw":
             if (!player.hasPermission("eco.admin")){
-                player.sendMessage(plugin.getLang().getFrom("commands.no_perm", player.getLocale()));
+                player.sendMessage(getLang("commands.no_perm", player));
                 return true;
              }
                 if (args.length < 2) {

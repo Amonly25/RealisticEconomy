@@ -13,13 +13,18 @@ public class TimeManager {
     public TimeManager(RealisticEconomy main) {
         plugin = main;
     }
+
+    private String getLang(String path, Player p){
+        return plugin.getLang().getFrom(path, p);
+    }
+
     public void checkPlayer(Player p) {
         
         // Cargar los datos del jugador desde la base de datos
         PlayerData pd = plugin.getDatabase().loadPlayerData(p.getUniqueId());
 
         if (pd.isSeizedAccount()) {
-            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+            p.sendMessage(getLang("bank.seized_account", p));
             return;
         }
     
@@ -39,16 +44,16 @@ public class TimeManager {
             // Verificar si el banco del servidor tiene suficiente saldo para pagar el interés
             if (plugin.getServerBank().getBalance() < deposit) {
                 deposit = plugin.getServerBank().getBalance();
-                p.sendMessage(plugin.getLang().getFrom("bank.no_bank_enought", p.getLocale()));
+                p.sendMessage(getLang("bank.no_bank_enought", p));
             }
             
             // Transferir el interés al jugador
             if (deposit > 0) {
                 if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), deposit)) {
-                    p.sendMessage(plugin.getLang().getFrom("bank.interest", p.getLocale()).replace("{amount}", String.valueOf(deposit)));
+                    p.sendMessage(getLang("bank.interest", p).replace("{amount}", String.valueOf(deposit)));
                     plugin.getEconomyLogger().log("Interest of " + deposit + " has been paid to " + p.getName());
                 } else {
-                    p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+                    p.sendMessage(getLang("error.transaction", p));
                 }
             }
             
@@ -60,12 +65,12 @@ public class TimeManager {
             // Si hay interés sobre la deuda
             if (interest > 0) {
                 plugin.getEconomyLogger().log("Interest of " + interest + " has been added to " + p.getName() + "'s debt");
-                p.sendMessage(plugin.getLang().getFrom("bank.loan_interest", p.getLocale()).replace("{amount}", interest + ""));
+                p.sendMessage(getLang("bank.loan_interest", p).replace("{amount}", interest + ""));
                 pd.setDebt(interest + loan); // Actualizar la deuda del jugador
                 pd.checkSeizedAccount(); // Verificar si la cuenta del jugador debe ser embargada
                 if (pd.isSeizedAccount()) {
                     plugin.getLogger().info("Account of " + p.getName() + " has been seized");
-                    p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+                    p.sendMessage(getLang("bank.seized_account", p));
                 }
                 pd.save(); // Guardar los datos del jugador
             }

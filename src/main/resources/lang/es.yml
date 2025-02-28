@@ -35,6 +35,7 @@ bank:
 token:
     pay: "&6Has pagado {amount} tokens a {player}."
     receive: "&6{player} te ha pagado {amount} tokens."
+    not_enough: "&cNo tienes suficientes tokens!"
 
 lottery:
     created: "&aLa lotería {name} ha sido creada!"

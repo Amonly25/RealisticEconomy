@@ -5,22 +5,16 @@ import java.util.UUID;
 import org.bukkit.entity.Player;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
-import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
 import com.ar.askgaming.realisticeconomy.Data.PlayerData;
 
 public class EconomyService {
 
-    private DatabaseManager database;
     private RealisticEconomy plugin;
 
     public EconomyService(RealisticEconomy main) {
         plugin = main;
-        database = plugin.getDatabase();
     }
 
-    private void log(String key){
-        plugin.getEconomyLogger().log(key);
-    }
     //#region Economy
     /**
      * Sets the balance of a player.

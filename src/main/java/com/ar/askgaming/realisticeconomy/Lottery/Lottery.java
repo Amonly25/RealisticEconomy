@@ -108,6 +108,7 @@ public class Lottery implements ConfigurationSerializable{
         this.jackpot = (double) map.get("jackpot");
         this.isActive = (boolean) map.get("isActive");
         if (map.get("tickets") instanceof HashMap) {
+            @SuppressWarnings("unchecked")
             HashMap<String, List<Integer>> tickets = (HashMap<String, List<Integer>>) map.get("tickets");
             for (String player : tickets.keySet()) {
                 this.tickets.put(UUID.fromString(player), tickets.get(player));

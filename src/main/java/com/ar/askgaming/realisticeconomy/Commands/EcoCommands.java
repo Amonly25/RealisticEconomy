@@ -40,6 +40,10 @@ public class EcoCommands implements TabExecutor{
         return null;
     }
 
+    private String getLang(String key,Player p){
+        return plugin.getLang().getFrom(key, p);
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
@@ -75,7 +79,7 @@ public class EcoCommands implements TabExecutor{
                 if (p.hasPermission("eco.admin")){
                     handleAddOrTake(sender, args, true);
                 } else {
-                   p.sendMessage(plugin.getLang().getFrom("commands.no_perm",p.getLocale()));
+                   p.sendMessage(getLang("commands.no_perm",p));
                 }
                 break;
             case "pay":
@@ -85,14 +89,14 @@ public class EcoCommands implements TabExecutor{
                 if (p.hasPermission("eco.admin")){
                     handleAddOrTake(sender, args, false);
                 } else {
-                    p.sendMessage(plugin.getLang().getFrom("commands.no_perm",p.getLocale()));
+                    p.sendMessage(getLang("commands.no_perm",p));
                 }
                 break;
             case "set":
                 if (p.hasPermission("eco.admin")){
                     setCommand(p, args);
                 } else {
-                    p.sendMessage(plugin.getLang().getFrom("commands.no_perm", p.getLocale()));
+                    p.sendMessage(getLang("commands.no_perm", p));
                 }
                 break;
             case "top":
@@ -108,15 +112,15 @@ public class EcoCommands implements TabExecutor{
                 if (p.hasPermission("eco.admin")){
                     resetCommand(p, args);
                 } else {
-                    p.sendMessage(plugin.getLang().getFrom("commands.no_perm", p.getLocale()));
+                    p.sendMessage(getLang("commands.no_perm", p));
                 }
                 break;
             case "reload":
                 if (p.hasPermission("eco.admin")){
                     plugin.reloadConfig();
-                    p.sendMessage(plugin.getLang().getFrom("commands.reload", p.getLocale()));
+                    p.sendMessage(getLang("commands.reload", p));
                 } else {
-                    p.sendMessage(plugin.getLang().getFrom("commands.no_perm", p.getLocale()));
+                    p.sendMessage(getLang("commands.no_perm", p));
                 }
                 break;
             default:
@@ -141,37 +145,47 @@ public class EcoCommands implements TabExecutor{
         int total_minutes = p.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60;
         int hours = total_minutes / 60;
         if (hours < playtime){
-            p.sendMessage(plugin.getLang().getFrom("bank.playtime", p.getLocale()).replace("{hours}", playtime+""));
+            p.sendMessage(getLang("bank.playtime", p).replace("{hours}", playtime+""));
             return;
 
         }
 
-        OfflinePlayer player = checkPlayer(p, args[1]); 
-        if (player == null){
+        OfflinePlayer target = checkPlayer(p, args[1]); 
+        if (target == null){
             return;
         }
         double d;
         try {
             d = Double.valueOf(args[2]);
         } catch (Exception e) {
-            p.sendMessage(getMsg("error.invalid_amount", p));
+            p.sendMessage(getLang("error.invalid_amount", p));
             return;
         }
         PlayerData pd = plugin.getDatabase().loadPlayerData(p.getUniqueId());
         if (pd.isSeizedAccount()) {
-            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+            p.sendMessage(getLang("bank.seized_account", p));
+            return;
+        }
+        if (d <= 0){
+            p.sendMessage(getLang("error.invalid_amount", p));
+            return;
+        }
+        if (pd.getBalance() < d){
+            p.sendMessage(getLang("error.not_enough", p));
             return;
         }
         
         d = round(d);
-        boolean transaction = plugin.getEconomyService().playerPayPlayer(p.getUniqueId(), player.getUniqueId(), d);
+        boolean transaction = plugin.getEconomyService().playerPayPlayer(p.getUniqueId(), target.getUniqueId(), d);
         if (transaction){
-            p.sendMessage(plugin.getLang().getFrom("transactions.pay", p.getLocale()).replace("{player}", args[1]).replace("{amount}", String.valueOf(d)));
-            if (player.isOnline()){
-                player.getPlayer().sendMessage(plugin.getLang().getFrom("transactions.pay_notify", player.getPlayer().getLocale()).replace("{player}", p.getName()).replace("{amount}", args[2]));
+            p.sendMessage(getLang("transactions.pay", p).replace("{player}", args[1]).replace("{amount}", String.valueOf(d)));
+            Player player = target.getPlayer();
+
+            if (player != null){
+                player.sendMessage(getLang("transactions.pay_notify", player).replace("{player}", p.getName()).replace("{amount}", args[2]));
             }
             plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + args[1] + " " + args[2]);
-        } else p.sendMessage(getMsg("error.transaction",p));
+        } else p.sendMessage(getLang("error.transaction",p));
         
     }
     //#region balance
@@ -184,19 +198,19 @@ public class EcoCommands implements TabExecutor{
             }
             double balance = plugin.getEconomyService().getBalance(player.getUniqueId());
             
-            p.sendMessage(plugin.getLang().getFrom("balance_other", p.getLocale()).replace("{balance}", EconomyManager.format(balance)).replace("{player}", args[1]));
+            p.sendMessage(getLang("balance_other", p).replace("{balance}", EconomyManager.format(balance)).replace("{player}", args[1]));
             return;
         }
         PlayerData playerData = plugin.getDatabase().loadPlayerData(p.getUniqueId());
         if (playerData == null){
-            p.sendMessage(plugin.getLang().getFrom("error.player_not_found",p.getLocale()));
+            p.sendMessage(getLang("error.player_not_found",p));
             return;
         }
         double balance = playerData.getBalance();
         double bankBalance = playerData.getBankBalance();
        
-        p.sendMessage(plugin.getLang().getFrom("balance", p.getLocale()).replace("{balance}", balance+""));
-        p.sendMessage(plugin.getLang().getFrom("bank_balance", p.getLocale()).replace("{balance}", bankBalance+""));
+        p.sendMessage(getLang("balance", p).replace("{balance}", balance+""));
+        p.sendMessage(getLang("bank_balance", p).replace("{balance}", bankBalance+""));
 
     }
     //#region add/take
@@ -226,22 +240,24 @@ public class EcoCommands implements TabExecutor{
         }
     
         double amount = round(Double.valueOf(args[2]));
-        OfflinePlayer player = checkPlayer(sender, args[1]);
+        OfflinePlayer target = checkPlayer(sender, args[1]);
     
         boolean transactionSuccess;
         if (isAdd) {
-            transactionSuccess = plugin.getServerBank().withdrawFromServerToPlayer(player.getUniqueId(), amount);
+            transactionSuccess = plugin.getServerBank().withdrawFromServerToPlayer(target.getUniqueId(), amount);
         } else {
-            transactionSuccess = plugin.getServerBank().depositFromPlayerToServer(player.getUniqueId(), amount);
+            transactionSuccess = plugin.getServerBank().depositFromPlayerToServer(target.getUniqueId(), amount);
         }
     
         if (transactionSuccess) {
             String action = isAdd ? "added" : "took";
             String message = sender.getName() + " " + action + " " + args[2] + " " + (isAdd ? "to" : "from") + " " + args[1];
             sender.sendMessage(message);
+
             plugin.getEconomyLogger().log(message);
-            if (player.isOnline()) {
-                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy." + (isAdd ? "add" : "take") + "_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
+            Player player = target.getPlayer();
+            if (player != null) {
+                player.sendMessage(getLang("economy." + (isAdd ? "add" : "take") + "_player_notify", player).replace("{amount}", args[2]));
             }
         } else {
             sender.sendMessage("§cError, transaction failed.");
@@ -249,7 +265,7 @@ public class EcoCommands implements TabExecutor{
     }
     public void handleServerCommand(Player p, String[] args){
         double d = plugin.getServerBank().getBalance();
-        p.sendMessage(plugin.getLang().getFrom("server_balance", p.getLocale()).replace("{balance}", EconomyManager.format(d)));
+        p.sendMessage(getLang("server_balance", p).replace("{balance}", EconomyManager.format(d)));
     }
     //#region set
     private List<Player> warn = new ArrayList<>();
@@ -260,7 +276,7 @@ public class EcoCommands implements TabExecutor{
             return;
         }
         double d = round(Double.valueOf(args[2]));
-        OfflinePlayer player = checkPlayer(p, args[1]);
+        OfflinePlayer target = checkPlayer(p, args[1]);
 
         if (!warn.contains(p)){
             p.sendMessage("§cWarning: This command will set the balance of the player without bank transaction.");
@@ -271,14 +287,15 @@ public class EcoCommands implements TabExecutor{
         }
         warn.remove(p);
 
-        boolean transaction = plugin.getEconomyService().setPlayerBalance(player.getUniqueId(), d);
+        boolean transaction = plugin.getEconomyService().setPlayerBalance(target.getUniqueId(), d);
         if (transaction){
-            p.sendMessage(plugin.getLang().getFrom("economy.set_player", p.getLocale()).replace("{player}", args[1]).replace("{amount}", args[2]));
-            if (player.isOnline()){
-                player.getPlayer().sendMessage(plugin.getLang().getFrom("economy.set_player_notify", player.getPlayer().getLocale()).replace("{amount}", args[2]));
+            p.sendMessage(getLang("economy.set_player", p).replace("{player}", args[1]).replace("{amount}", args[2]));
+            Player player = target.getPlayer();
+            if (player != null){
+                player.sendMessage(getLang("economy.set_player_notify", player).replace("{amount}", args[2]));
             }
             plugin.getEconomyLogger().log("Player " + p.getName() + " set " + args[1] + " to " + args[2]);
-        } else p.sendMessage(getMsg("error.transaction",p));
+        } else p.sendMessage(getLang("error.transaction",p));
         
     }
     //#region reset
@@ -330,11 +347,8 @@ public class EcoCommands implements TabExecutor{
         if (player.hasPlayedBefore()){
             return player;
         }
-        sender.sendMessage(plugin.getLang().getFrom("error.player_not_found","EN_US"));
+        sender.sendMessage(getLang("error.player_not_found",null));
         return null;
-    }
-    private String getMsg(String key,Player p){
-        return plugin.getLang().getFrom(key, p.getLocale());
     }
 
     //#region help
@@ -349,14 +363,14 @@ public class EcoCommands implements TabExecutor{
     //#region info
     private void showEcoInfo(Player p, String[] args){ 
         double d = plugin.getServerBank().getBalance();
-        p.sendMessage(plugin.getLang().getFrom("server_balance", p.getLocale()).replace("{balance}", EconomyManager.format(d)));
+        p.sendMessage(getLang("server_balance", p).replace("{balance}", EconomyManager.format(d)));
 
         double players = plugin.getEconomyManager().getPlayerBalances();
-        p.sendMessage(plugin.getLang().getFrom("bank.info.players", p.getLocale()).replace("{value}", EconomyManager.format(players)));
+        p.sendMessage(getLang("bank.info.players", p).replace("{value}", EconomyManager.format(players)));
 
         plugin.getEconomyManager().calculateInflation();
         String inf = EconomyManager.format(plugin.getEconomyManager().getInflation());
-        p.sendMessage(plugin.getLang().getFrom("bank.info.inflation", p.getLocale()).replace("{value}", inf));
+        p.sendMessage(getLang("bank.info.inflation", p).replace("{value}", inf));
         
 
     }

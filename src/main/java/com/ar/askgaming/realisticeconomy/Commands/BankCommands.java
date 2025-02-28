@@ -2,7 +2,6 @@ package com.ar.askgaming.realisticeconomy.Commands;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,6 +25,9 @@ public class BankCommands implements TabExecutor{
             return List.of("loan", "pay", "deposit", "withdraw", "info");
         } 
         return null;
+    }
+    private String getLang(String path, Player p){
+        return plugin.getLang().getFrom(path, p);
     }
 
     @Override
@@ -103,37 +105,37 @@ public class BankCommands implements TabExecutor{
     }
     //#region info
     private void showBankInfo(Player p, PlayerData pd) {
-        p.sendMessage(plugin.getLang().getFrom("bank.info.interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getLoanInterest())));
-        p.sendMessage(plugin.getLang().getFrom("bank.info.savings_interest", p.getLocale()).replace("{value}", String.valueOf(plugin.getEconomyManager().getSavingsInterest())));
+        p.sendMessage(getLang("bank.info.interest", p).replace("{value}", String.valueOf(plugin.getEconomyManager().getLoanInterest())));
+        p.sendMessage(getLang("bank.info.savings_interest", p).replace("{value}", String.valueOf(plugin.getEconomyManager().getSavingsInterest())));
         p.sendMessage("");
         
         double savingsInterest = pd.getBankBalance() * plugin.getEconomyManager().getSavingsInterest() / 100;
 
         String formattedNumber = String.format("%.4f", savingsInterest);
-        p.sendMessage(plugin.getLang().getFrom("bank.info.balance", p.getLocale()).replace("{value}", String.valueOf(pd.getBankBalance())).replace("{interest}", formattedNumber));
+        p.sendMessage(getLang("bank.info.balance", p).replace("{value}", String.valueOf(pd.getBankBalance())).replace("{interest}", formattedNumber));
         
         double loanInterest = pd.getDebt() * plugin.getEconomyManager().getLoanInterest() / 100;
         String formattedNumber2 = String.format("%.4f", loanInterest);
         
-        p.sendMessage(plugin.getLang().getFrom("bank.info.debt", p.getLocale()).replace("{value}", String.valueOf(pd.getDebt())).replace("{interest}", formattedNumber2));
+        p.sendMessage(getLang("bank.info.debt", p).replace("{value}", String.valueOf(pd.getDebt())).replace("{interest}", formattedNumber2));
 
     }
     //#region loan
     private void takeLoan(Player p, PlayerData pd, double amount) {
         if (amount <= 0) {
-            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
+            p.sendMessage(getLang("error.invalid_amount", p));
             return;
         }
         double limit = plugin.getEconomyManager().getDebtLimit();
         if (pd.getDebt() >= limit || amount > limit - pd.getDebt()) {
-            p.sendMessage(plugin.getLang().getFrom("bank.debt_limit", p.getLocale()));
+            p.sendMessage(getLang("bank.debt_limit", p));
             return;
         }
         int playtime = plugin.getConfig().getInt("playtime_minimum_for_loan",6);
         int total_minutes = p.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60;
         int hours = total_minutes / 60;
         if (hours < playtime){
-            p.sendMessage(plugin.getLang().getFrom("bank.playtime", p.getLocale()).replace("{hours}", playtime+""));
+            p.sendMessage(getLang("bank.playtime", p).replace("{hours}", playtime+""));
             return;
 
         }
@@ -142,9 +144,9 @@ public class BankCommands implements TabExecutor{
             pd.setDebt(pd.getDebt() + amount);
             pd.save();
             plugin.getEconomyLogger().log("Player " + p.getName() + " took a loan of " + amount);
-            p.sendMessage(plugin.getLang().getFrom("bank.loan", p.getLocale()).replace("{amount}", String.valueOf(amount)));
+            p.sendMessage(getLang("bank.loan", p).replace("{amount}", String.valueOf(amount)));
         } else {
-            p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+            p.sendMessage(getLang("error.transaction", p));
            // plugin.getEconomyLogger().log("Player " + p.getName() + " tried to take a loan of " + amount + " but the transaction failed");
         }
     }
@@ -152,41 +154,41 @@ public class BankCommands implements TabExecutor{
     private void payDebt(Player p, PlayerData pd, double amount) {
 
         if (amount <= 0 || amount > pd.getBalance() || amount > pd.getDebt()) {
-            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
+            p.sendMessage(getLang("error.invalid_amount", p));
             return;
         }
         if (plugin.getServerBank().depositFromPlayerToServer(p.getUniqueId(), amount)) {
             pd.setDebt(pd.getDebt() - amount);
             plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + amount + " of debt");
-            p.sendMessage(plugin.getLang().getFrom("bank.pay_debt", p.getLocale()).replace("{amount}", String.valueOf(amount)));
+            p.sendMessage(getLang("bank.pay_debt", p).replace("{amount}", String.valueOf(amount)));
 
             if (pd.isSeizedAccount()){
                 if (pd.getDebt() < plugin.getConfig().getDouble("min_debt_to_remove_seized_when_pay", 4000)) {
                     pd.setSeized_account(false);
-                    p.sendMessage(plugin.getLang().getFrom("bank.unseized_account", p.getLocale()));
+                    p.sendMessage(getLang("bank.unseized_account", p));
                 }
             }
             pd.save();
         } else {
-            p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+            p.sendMessage(getLang("error.transaction", p));
             //plugin.getEconomyLogger().log("Player " + p.getName() + " tried to pay " + amount + " of debt but the transaction failed");
         }
     }
     //#region deposit
     private void depositToBank(Player p, PlayerData pd, double amount) {
         if (pd.isSeizedAccount()) {
-            p.sendMessage(plugin.getLang().getFrom("bank.seized_account", p.getLocale()));
+            p.sendMessage(getLang("bank.seized_account", p));
             return;
         }
         if (amount <= 0 || amount > pd.getBalance()) {
-            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
+            p.sendMessage(getLang("error.invalid_amount", p));
             return;
         }
         if (plugin.getEconomyService().depositToPlayerBank(p.getUniqueId(), amount)) {
-            p.sendMessage(plugin.getLang().getFrom("bank.deposit", p.getLocale()).replace("{amount}", String.valueOf(amount)));
+            p.sendMessage(getLang("bank.deposit", p).replace("{amount}", String.valueOf(amount)));
             plugin.getEconomyLogger().log("Player " + p.getName() + " deposited " + amount + " to the bank");
         } else {
-            p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+            p.sendMessage(getLang("error.transaction", p));
            // plugin.getEconomyLogger().log("Player " + p.getName() + " tried to deposit " + amount + " to the bank but the transaction failed");
 
         }
@@ -194,14 +196,14 @@ public class BankCommands implements TabExecutor{
     //#region withdraw
     private void withdrawFromBank(Player p, PlayerData pd, double amount) {
         if (amount <= 0 || amount > pd.getBankBalance()) {
-            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
+            p.sendMessage(getLang("error.invalid_amount", p));
             return;
         }
         if (plugin.getEconomyService().withdrawFromPlayerBank(p.getUniqueId(), amount)) {
-            p.sendMessage(plugin.getLang().getFrom("bank.withdraw", p.getLocale()).replace("{amount}", String.valueOf(amount)));
+            p.sendMessage(getLang("bank.withdraw", p).replace("{amount}", String.valueOf(amount)));
             plugin.getEconomyLogger().log("Player " + p.getName() + " withdrew " + amount + " from the bank");
         } else {
-            p.sendMessage(plugin.getLang().getFrom("error.transaction", p.getLocale()));
+            p.sendMessage(getLang("error.transaction", p));
            // plugin.getEconomyLogger().log("Player " + p.getName() + " tried to withdraw " + amount + " from the bank but the transaction failed");
         }
     }

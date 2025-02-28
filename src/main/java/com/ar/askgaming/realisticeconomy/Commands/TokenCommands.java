@@ -37,6 +37,10 @@ public class TokenCommands implements TabExecutor{
         return null;
     }
 
+    private String getLang(String path, Player p){
+        return plugin.getLang().getFrom(path, p);
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         
@@ -83,7 +87,7 @@ public class TokenCommands implements TabExecutor{
             p.sendMessage("§cPlayer data not found.");
             return;
         }
-        p.sendMessage(plugin.getLang().getFrom("tokens", p.getLocale()).replace("{amount}", String.valueOf(pd.getTokens())));
+        p.sendMessage(getLang("tokens", p).replace("{amount}", String.valueOf(pd.getTokens())));
     }
     //#region pay
     private void pay(CommandSender sender, String[] args){
@@ -97,37 +101,37 @@ public class TokenCommands implements TabExecutor{
             return;
         }
         if (!p.hasPermission("eco.tokens.pay")){
-            p.sendMessage(plugin.getLang().getFrom("error.no_permission",p.getLocale()));
+            p.sendMessage(getLang("error.no_permission",p));
             return;
         }
         Player target = plugin.getServer().getPlayer(args[1]);
         if (target == null){
-            p.sendMessage(plugin.getLang().getFrom("error.player_not_found",p.getLocale()));
+            p.sendMessage(getLang("error.player_not_found",p));
             return;
         }
         int amount;
         try {
             amount = Integer.parseInt(args[2]);
         } catch (Exception e) {
-            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount",p.getLocale()));
+            p.sendMessage(getLang("error.invalid_amount",p));
             return;
         }
         if (amount <= 0){
-            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount",p.getLocale()));
+            p.sendMessage(getLang("error.invalid_amount",p));
             return;
         }
         PlayerData pd = plugin.getDatabase().loadPlayerData(p.getUniqueId());
         if (amount >= pd.getTokens()){
-            p.sendMessage(plugin.getLang().getFrom("error.not_enough",p.getLocale()));
+            p.sendMessage(getLang("error.not_enough",p));
             return;
         }
 
         if (plugin.getEconomyService().playerPayTokenToPlayer(p.getUniqueId(), target.getUniqueId(), amount)){
             plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + amount + " tokens to " + target.getName());
-            p.sendMessage(plugin.getLang().getFrom("token.pay", p.getLocale()).replace("{player}", target.getName()).replace("{amount}", String.valueOf(amount)));
-            target.sendMessage(plugin.getLang().getFrom("token.receive", p.getLocale()).replace("{player}", p.getName()).replace("{amount}", String.valueOf(amount)));
+            p.sendMessage(getLang("token.pay", p).replace("{player}", target.getName()).replace("{amount}", String.valueOf(amount)));
+            target.sendMessage(getLang("token.receive", p).replace("{player}", p.getName()).replace("{amount}", String.valueOf(amount)));
         } else {
-            p.sendMessage(plugin.getLang().getFrom("error.transaction",p.getLocale()));
+            p.sendMessage(getLang("error.transaction",p));
         }
 
     }
@@ -139,7 +143,7 @@ public class TokenCommands implements TabExecutor{
         }
         Player p = (Player) sender;
         if (!p.hasPermission("eco.admin")){
-            p.sendMessage(plugin.getLang().getFrom("error.no_permission",p.getLocale()));
+            p.sendMessage(getLang("error.no_permission",p));
             return;
         }
 
@@ -166,7 +170,7 @@ public class TokenCommands implements TabExecutor{
     //#region give
     private void give(CommandSender sender, String[] args){
         if (!sender.hasPermission("eco.admin")){
-            sender.sendMessage(plugin.getLang().getFrom("error.no_permission","en"));
+            sender.sendMessage(getLang("error.no_permission",null));
             return;
         }
         if (args.length < 3){
@@ -178,26 +182,26 @@ public class TokenCommands implements TabExecutor{
 
         PlayerData pd = plugin.getDatabase().loadPlayerData(target.getUniqueId());
         if (pd == null){
-            sender.sendMessage(plugin.getLang().getFrom("error.player_not_found","en"));
+            sender.sendMessage(getLang("error.player_not_found",null));
             return;
         }
         int amount;
         try {
             amount = Integer.parseInt(args[2]);
         } catch (Exception e) {
-            sender.sendMessage(plugin.getLang().getFrom("error.invalid_amount","en"));
+            sender.sendMessage(getLang("error.invalid_amount",null));
             return;
         }
         if (amount <= 0){
-            sender.sendMessage(plugin.getLang().getFrom("error.invalid_amount","en"));
+            sender.sendMessage(getLang("error.invalid_amount",null));
             return;
         }
         pd.setTokens(pd.getTokens() + amount);
         pd.save();
-        sender.sendMessage(plugin.getLang().getFrom("token.give","en").replace("{player}", target.getName()).replace("{amount}", String.valueOf(amount)));
+        sender.sendMessage(getLang("token.give",null).replace("{player}", target.getName()).replace("{amount}", String.valueOf(amount)));
         Player p = target.getPlayer();
         if (p != null){
-            p.sendMessage(plugin.getLang().getFrom("token.receive",p.getLocale()).replace("{amount}", String.valueOf(amount)));
+            p.sendMessage(getLang("token.receive",p).replace("{amount}", String.valueOf(amount)));
         }
     }
 }

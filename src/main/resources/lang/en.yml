@@ -35,6 +35,7 @@ bank:
 token:
     pay: "&6You paid {amount} tokens to {player}."
     receive: "&aYou have received {amount} tokens."
+    not_enough: "&cYou don't have enough tokens!"
 
 lottery:
     created: "&aLottery {name} has been created!"

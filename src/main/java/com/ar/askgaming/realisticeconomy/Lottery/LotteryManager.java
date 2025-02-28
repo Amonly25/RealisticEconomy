@@ -18,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
-import com.ar.askgaming.realisticeconomy.Data.LangManager;
 
 public class LotteryManager extends BukkitRunnable {
     
@@ -28,24 +27,19 @@ public class LotteryManager extends BukkitRunnable {
 
     public LotteryManager(RealisticEconomy main) {
         plugin = main;
-        lang = plugin.getLang();
+
+        runTaskTimer(plugin, 0, 20*60);
 
         loteryFile = new File(plugin.getDataFolder(), "lottery.yml");
         if (!loteryFile.exists()) {
             plugin.saveResource("lottery.yml", false);
         }
 
-        loteryConfig = new YamlConfiguration();
-        try {
-            loteryConfig.load(loteryFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        loteryConfig = YamlConfiguration.loadConfiguration(loteryFile);
 
-        // Obtener todas las claves del nivel raíz
         Set<String> keys = loteryConfig.getKeys(false);
+        if (keys.isEmpty()) return;
 
-        // Iterar sobre todas las keys y cargar cada loteria
         for (String key : keys) {
             Object obj = loteryConfig.get(key);
             if (obj instanceof Lottery) {
@@ -54,9 +48,10 @@ public class LotteryManager extends BukkitRunnable {
                 loteryList.put(key, protection);
             }
         }
-        runTaskTimer(plugin, 0, 20*60);
     }
-    private LangManager lang;
+    private String getLang(String path, Player p){
+        return plugin.getLang().getFrom(path, p);
+    }
 
     private HashMap<String, Lottery> loteryList = new HashMap<>();
 
@@ -74,7 +69,9 @@ public class LotteryManager extends BukkitRunnable {
         loteryConfig.set(name, lotery);
         saveConfig();
 
-        lang.broadcastTranslated("lottery.created","{name}", name);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(getLang("lottery.created", p).replace("{name}", name));
+        }
           
     }
     public void drawLotery(String name) {
@@ -88,17 +85,23 @@ public class LotteryManager extends BukkitRunnable {
         List<UUID> winners = getWinners(lotery);
         boolean hasWinners = !winners.isEmpty();
         double prize = hasWinners ? lotery.getJackpot() / winners.size() : 0;
-        lang.broadcastTranslated("lottery.drawn","{name}", name);
-        lang.broadcastTranslated("lottery.number","{number}", String.valueOf(winningNumber));
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(getLang("lottery.drawn", p).replace("{name}", name));
+            p.sendMessage(getLang("lottery.number", p).replace("{number}", String.valueOf(winningNumber)));
+        }
        
         if (hasWinners) {
             double jackpot = plugin.getConfig().getDouble("lottery.jackpot",100);
             lotery.setJackpot(jackpot);
             processWinners(name, prize, winners);
-        } else {
 
-            lang.broadcastTranslated("lottery.jackpot","{amount}", String.valueOf(lotery.getJackpot()));
-            lang.broadcastTranslated("lottery.no_winners","{none}", "");
+        } else {
+        
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(getLang("lottery.jackpor", p).replace("{amount}", String.valueOf(lotery.getJackpot())));
+                p.sendMessage(getLang("lottery.no_winners", p));
+            }
         }
         lotery.reset();
         saveConfig();
@@ -125,17 +128,17 @@ public class LotteryManager extends BukkitRunnable {
     private void processWinners(String name, double prize, List<UUID> winners) {
         for (UUID winner : winners) {
             OfflinePlayer player = Bukkit.getOfflinePlayer(winner);
-            boolean deposit = plugin.getEconomyService().depositPlayer(winner, prize);
+            plugin.getEconomyService().depositPlayer(winner, prize);
             double taxes = prize * 0.1;
-            boolean taken = plugin.getServerBank().depositFromPlayerToServer(winner, taxes);
+            plugin.getServerBank().depositFromPlayerToServer(winner, taxes);
 
             //Verificar la transacción
 
             if (player.isOnline()) {
                 Player onlinePlayer = player.getPlayer();
                 if (onlinePlayer != null) {
-                    onlinePlayer.sendMessage(lang.getFrom("lottery.won",onlinePlayer.getLocale()).replace("{amount}", String.valueOf(prize)));
-                    onlinePlayer.sendMessage(lang.getFrom("lottery.taxes",onlinePlayer.getLocale()).replace("{taxes}", String.valueOf(taxes)));
+                    onlinePlayer.sendMessage(getLang("lottery.won",onlinePlayer).replace("{amount}", String.valueOf(prize)));
+                    onlinePlayer.sendMessage(getLang("lottery.taxes",onlinePlayer).replace("{taxes}", String.valueOf(taxes)));
 
                 }
             }
@@ -145,8 +148,11 @@ public class LotteryManager extends BukkitRunnable {
             OfflinePlayer player = Bukkit.getOfflinePlayer(winner);
             winnersNames.add(player.getName());
         }
-        lang.broadcastTranslated("lottery.winners","{list}", String.join(", ", winnersNames));
-        lang.broadcastTranslated("lottery.reward","{amount}", String.valueOf(prize));
+        
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(getLang("lottery.winners", p).replace("{list}", String.join(", ", winnersNames)));
+            p.sendMessage(getLang("lottery.reward", p).replace("{amount}", String.valueOf(prize)));
+        }
 
     }
     // Buy a ticket for the lottery
@@ -154,23 +160,27 @@ public class LotteryManager extends BukkitRunnable {
     public void buyTicket(Player p, String name, int number) {
         Lottery lotery = loteryList.get(name);
         if (lotery == null || !lotery.isActive()) {
-            p.sendMessage(lang.getFrom("lottery.no_active", p.getLocale()));
+            p.sendMessage(getLang("lottery.no_active", p));
             return;
         }
         if (number < 1 || number > lotery.getNumberLimit()) {
-            p.sendMessage(lang.getFrom("lottery.number_limit", p.getLocale()).replace("{number}", String.valueOf(lotery.getNumberLimit())));
+            p.sendMessage(getLang("lottery.number_limit", p).replace("{number}", String.valueOf(lotery.getNumberLimit())));
             return;
         }
         if (plugin.getEconomyService().getBalance(p.getUniqueId()) < lotery.getTicketPrice()) {
-            p.sendMessage(lang.getFrom("error.not_enough", p.getLocale()));
+            p.sendMessage(getLang("error.not_enough", p));
             return;
         }
         if (plugin.getEconomyService().withdrawPlayer(p.getUniqueId(), lotery.getTicketPrice())) {
             lotery.addTicket(p.getUniqueId(), number);
-            p.sendMessage(lang.getFrom("lottery.buy", p.getLocale()).replace("{number}", String.valueOf(number)));
-            lang.broadcastTranslated("lottery.player_buy", "{name}", name);
+            p.sendMessage(getLang("lottery.buy", p).replace("{number}", String.valueOf(number)));
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.sendMessage(getLang("lottery.player_buy", player).replace("{name}", name));
+            }
+
         } else {
-            p.sendMessage(lang.getFrom("error.transaction", p.getLocale()));
+            p.sendMessage(getLang("error.transaction", p));
         }
     }
     //#region Info
@@ -179,12 +189,12 @@ public class LotteryManager extends BukkitRunnable {
         Lottery lotery = loteryList.get(name);
         if (lotery == null) return;
 
-        p.sendMessage(lang.getFrom("lottery.info.name", p.getLocale()).replace("{name}", name));
-        p.sendMessage(lang.getFrom("lottery.info.ticket_price", p.getLocale()).replace("{price}", String.valueOf(lotery.getTicketPrice())));
-        p.sendMessage(lang.getFrom("lottery.info.number_limit", p.getLocale()).replace("{numbers}", String.valueOf(lotery.getNumberLimit())));
-        p.sendMessage(lang.getFrom("lottery.info.tickets_sold", p.getLocale()).replace("{sold}", String.valueOf(lotery.getTicketsSold())));
-        p.sendMessage(lang.getFrom("lottery.info.jackpot", p.getLocale()).replace("{jackpot}", String.valueOf(lotery.getJackpot())));
-        p.sendMessage(lang.getFrom("lottery.info.active", p.getLocale()).replace("{active}", String.valueOf(lotery.isActive())));
+        p.sendMessage(getLang("lottery.info.name", p).replace("{name}", name));
+        p.sendMessage(getLang("lottery.info.ticket_price", p).replace("{price}", String.valueOf(lotery.getTicketPrice())));
+        p.sendMessage(getLang("lottery.info.number_limit", p).replace("{numbers}", String.valueOf(lotery.getNumberLimit())));
+        p.sendMessage(getLang("lottery.info.tickets_sold", p).replace("{sold}", String.valueOf(lotery.getTicketsSold())));
+        p.sendMessage(getLang("lottery.info.jackpot", p).replace("{jackpot}", String.valueOf(lotery.getJackpot())));
+        p.sendMessage(getLang("lottery.info.active", p).replace("{active}", String.valueOf(lotery.isActive())));
 
     }
     // Delete a lottery
@@ -193,7 +203,10 @@ public class LotteryManager extends BukkitRunnable {
             loteryList.remove(name);
             loteryConfig.set(name, null);
             saveConfig();
-            lang.broadcastTranslated("lottery.remove", "{name}", name);
+
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(getLang("lottery.remove", p).replace("{name}", name));
+            }
         }
     }
 
@@ -202,7 +215,10 @@ public class LotteryManager extends BukkitRunnable {
         Lottery lotery = loteryList.get(name);
         if (lotery != null) {
             lotery.reset();
-            lang.broadcastTranslated("lottery.reset", "{name}", name);
+
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(getLang("lottery.reset", p).replace("{name}", name));
+            }
             saveConfig();
         }
     }

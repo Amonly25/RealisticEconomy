@@ -19,20 +19,20 @@ public class UtilityMethods {
             try {
                 page = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                p.sendMessage(plugin.getLang().getFrom("error.invalid_amount",p.getLocale()));
+                p.sendMessage(plugin.getLang().getFrom("error.invalid_amount",p));
                 return;
             }
         }
 
         int totalPages = (int) Math.ceil(list.size() / 10.0);
         if (page > totalPages || page < 1) {
-            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p.getLocale()));
+            p.sendMessage(plugin.getLang().getFrom("error.invalid_amount", p));
             return;
         }
 
         int start = (page - 1) * 10;
         int end = Math.min(start + 10, list.size());
-        p.sendMessage(plugin.getLang().getFrom("misc.pages", p.getLocale()) + " " + page + "/" + totalPages);
+        p.sendMessage(plugin.getLang().getFrom("misc.pages", p) + " " + page + "/" + totalPages);
         for (int i = start; i < end; i++) {
             String clan = list.get(i);
             p.sendMessage((i + 1) + ". " + clan);

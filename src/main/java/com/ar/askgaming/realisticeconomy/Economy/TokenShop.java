@@ -19,7 +19,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.checkerframework.checker.units.qual.t;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
@@ -186,7 +185,7 @@ public class TokenShop implements Listener{
 
     public void openInventory(Player player, int page) {
         if (inventories.isEmpty()) {
-            player.sendMessage("No items to show");
+            player.sendMessage("§cNo items to show in the shop.");
             return;
         }
         if (page >= 0 && page < inventories.size()) {
@@ -230,7 +229,7 @@ public class TokenShop implements Listener{
 
             if (price > 0){
                 if (tokens < price){ 
-                    p.sendMessage("No tienes suficiente dinero para comprar este ítem.");
+                    p.sendMessage(plugin.getLang().getFrom("token.not_enough", p));
                     return;
                 }
                 canContinue = plugin.getEconomyService().setTokens(uuid, tokens - price);
