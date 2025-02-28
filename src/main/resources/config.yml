@@ -29,5 +29,9 @@ lottery:
       "22:00":
       - "weekly" #Lottery name
 
+tokenshop:
+  title: "Tokens Shop"
+  
+
 
 

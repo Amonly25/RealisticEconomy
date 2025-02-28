@@ -16,6 +16,8 @@ import com.ar.askgaming.realisticeconomy.Economy.BankTransactions;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyLogger;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyManager;
 import com.ar.askgaming.realisticeconomy.Economy.EconomyService;
+import com.ar.askgaming.realisticeconomy.Economy.TokenShop;
+import com.ar.askgaming.realisticeconomy.Listeners.InventoryClickListener;
 import com.ar.askgaming.realisticeconomy.Listeners.PlayerJoinListener;
 import com.ar.askgaming.realisticeconomy.Lottery.Lottery;
 import com.ar.askgaming.realisticeconomy.Lottery.LotteryCommands;
@@ -40,6 +42,7 @@ public class RealisticEconomy extends JavaPlugin{
     private LangManager langHandler;
     private EconomyLogger economyLogger;
     private VaultHook vaultHook;
+    private TokenShop tokenShop;
 
     public void onEnable(){
         
@@ -71,6 +74,7 @@ public class RealisticEconomy extends JavaPlugin{
         serverLang = getConfig().getString("server_lang", "en");
         economyLogger = new EconomyLogger(this);
         utilityMethods = new UtilityMethods(this);
+        tokenShop = new TokenShop(this);
         
         getServer().getServicesManager().register(EconomyService.class, economyService, this, ServicePriority.Highest);
 
@@ -80,6 +84,8 @@ public class RealisticEconomy extends JavaPlugin{
         getServer().getPluginCommand("bank").setExecutor(new BankCommands(this));
         getServer().getPluginCommand("lottery").setExecutor(new LotteryCommands(this));
         getServer().getPluginCommand("tokens").setExecutor(new TokenCommands(this));
+
+        new InventoryClickListener(this);
 
         if (setupVault()) {
             getLogger().info("Hooked into Vault!");
@@ -101,6 +107,9 @@ public class RealisticEconomy extends JavaPlugin{
     }
     public EconomyService getEconomyService() {
         return economyService;
+    }
+    public TokenShop getTokenShop() {
+        return tokenShop;
     }
     public BankTransactions getServerBank() {
         return serverBank;

@@ -24,9 +24,8 @@ public class BankCommands implements TabExecutor{
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
             return List.of("loan", "pay", "deposit", "withdraw", "info");
-        } else {
-            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
-        }
+        } 
+        return null;
     }
 
     @Override

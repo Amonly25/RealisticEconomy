@@ -27,9 +27,17 @@ public class EcoCommands implements TabExecutor{
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1){
-            return List.of("balance","add","take","pay","server","top","info");
-
-        } else return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+            List<String> list = new ArrayList<>(List.of("balance","pay","server","top","info")); // Lista modificable
+            if (sender.hasPermission("eco.admin")){
+                list.add("add");
+                list.add("take");
+                list.add("set");
+                list.add("reset");
+                list.add("reload");
+            }
+            return list;
+        }
+        return null;
     }
 
     @Override

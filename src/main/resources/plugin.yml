@@ -23,6 +23,7 @@ commands:
     description: Main command for RealisticEconomy tokens
     usage: /tokens <subcommand>
     permission: eco.user
+    aliases: [token]
 permissions:
   eco.admin:
     description: Allows access to all RealisticEconomy commands

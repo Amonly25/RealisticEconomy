@@ -34,7 +34,7 @@ bank:
 
 token:
     pay: "&6You paid {amount} tokens to {player}."
-    receive: "&6{player} has paid you {amount} tokens."
+    receive: "&aYou have received {amount} tokens."
 
 lottery:
     created: "&aLottery {name} has been created!"
