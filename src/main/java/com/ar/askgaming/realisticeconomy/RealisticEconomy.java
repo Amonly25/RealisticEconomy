@@ -52,7 +52,7 @@ public class RealisticEconomy extends JavaPlugin{
 
         ConfigurationSerialization.registerClass(Lottery.class,"Lottery");
 
-        try (Connection conn = database.connect()) {
+        try (Connection conn = database.getConnection()) {
             getLogger().info("Connected to database.");
             database.createTable();
             database.createServerBankTable();
@@ -95,6 +95,7 @@ public class RealisticEconomy extends JavaPlugin{
     }
 
     public void onDisable() {
+        database.disconnect();
         
     }
     private boolean setupVault() {

@@ -72,7 +72,7 @@ public class EconomyManager {
                 throw new IllegalStateException("Unknown data mode: " + database.getDatabaseType());
         }
 
-        try (Connection conn = database.connect();
+        try (Connection conn = database.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
             stmt.executeUpdate();

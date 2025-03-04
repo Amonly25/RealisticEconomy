@@ -19,6 +19,7 @@ public class DatabaseManager {
     private final String databaseUrl;
     private final String username;
     private final String password;
+    private Connection connection;
 
     private final HashMap<UUID, PlayerData> playerCache = new HashMap<>();
 
@@ -54,14 +55,37 @@ public class DatabaseManager {
         }
     }
 
-    public Connection connect() throws SQLException {
-        switch (databaseType) {
+    public void connect() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            return; // Ya hay una conexión abierta
+        }
+
+        switch (databaseType.toUpperCase()) {
             case "SQLITE":
-                return DriverManager.getConnection("jdbc:sqlite:" + databaseUrl);
+                connection = DriverManager.getConnection("jdbc:sqlite:" + databaseUrl);
+                break;
             case "MYSQL":
-                return DriverManager.getConnection("jdbc:mysql://" + databaseUrl, username, password);
+                connection = DriverManager.getConnection("jdbc:mysql://" + databaseUrl, username, password);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown database type: " + databaseType);
+        }
+    }
+
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connect(); // Reabrir si está cerrada
+        }
+        return connection;
+    }
+
+    public void disconnect() {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
     public String getDatabaseType() {
@@ -95,7 +119,7 @@ public class DatabaseManager {
                 throw new IllegalStateException("Unknown data mode: " + databaseType);
         }
 
-        try (Connection conn = connect();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.execute();
         } catch (SQLException e) {
@@ -120,7 +144,7 @@ public class DatabaseManager {
                 throw new IllegalStateException("Unknown data mode: " + databaseType);
         }
     
-        try (Connection conn = connect();
+        try (Connection conn = getConnection();
              PreparedStatement createStmt = conn.prepareStatement(createSql)) {
     
             // Crear la tabla
@@ -151,7 +175,7 @@ public class DatabaseManager {
     public HashMap<String, Double> getBalances() {
         String sql = "SELECT uuid, balance, bankBalance, debt FROM economy";
         HashMap<String, Double> balances = new HashMap<>();
-        try (Connection conn = connect();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
     
@@ -173,7 +197,7 @@ public class DatabaseManager {
             return playerCache.get(playerUUID);
         }
         String sql = "SELECT balance, bankBalance, debt, tokens, lastLogin FROM economy WHERE uuid = ?";
-        try (Connection conn = connect();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, playerUUID.toString());
             try (ResultSet rs = stmt.executeQuery()) {

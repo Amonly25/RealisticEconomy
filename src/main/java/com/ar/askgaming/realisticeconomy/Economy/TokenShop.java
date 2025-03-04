@@ -235,6 +235,7 @@ public class TokenShop implements Listener{
                 canContinue = plugin.getEconomyService().setTokens(uuid, tokens - price);
             }
             if (canContinue){
+                plugin.getEconomyLogger().log("Player " + p.getName() + " bought " + tokenItemShop.getDisplayName() + " for " + price + " tokens.");
                 if (tokenItemShop.getCommands().size() > 0){
                     for (String command : tokenItemShop.getCommands()) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("{player}", p.getName()));

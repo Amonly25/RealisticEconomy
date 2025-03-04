@@ -26,7 +26,7 @@ public class BankTransactions {
 
         String sql = "SELECT balance FROM serverbank LIMIT 1"; // Consulta para obtener el balance
 
-        try (Connection conn = database.connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = database.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery(); // Ejecutar la consulta y obtener el resultado
     
             if (rs.next()) { // Verificar si hay un resultado
@@ -61,7 +61,7 @@ public class BankTransactions {
             return false;
         }
 
-        try (Connection conn = database.connect()) {
+        try (Connection conn = database.getConnection()) {
             conn.setAutoCommit(false); // Iniciar la transacción
     
             // Actualizar el balance del banco del servidor
@@ -104,7 +104,7 @@ public class BankTransactions {
             return false;
         }
         
-        try (Connection conn = database.connect()) {
+        try (Connection conn = database.getConnection()) {
             conn.setAutoCommit(false); // Iniciar la transacción
         
             // Actualizar el balance del banco del servidor
@@ -124,7 +124,7 @@ public class BankTransactions {
         }
     }
     public boolean setServerBankBalance(double newBalance) {
-        try (Connection conn = database.connect()) {
+        try (Connection conn = database.getConnection()) {
             return saveServerBankBalance(newBalance, getBalance(), conn);
         } catch (SQLException e) {
             e.printStackTrace();

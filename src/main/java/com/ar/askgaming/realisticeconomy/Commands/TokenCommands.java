@@ -198,6 +198,7 @@ public class TokenCommands implements TabExecutor{
         }
         pd.setTokens(pd.getTokens() + amount);
         pd.save();
+        plugin.getEconomyLogger().log("Player " + sender.getName() + " gave " + amount + " tokens to " + target.getName());
         sender.sendMessage(getLang("token.give",null).replace("{player}", target.getName()).replace("{amount}", String.valueOf(amount)));
         Player p = target.getPlayer();
         if (p != null){

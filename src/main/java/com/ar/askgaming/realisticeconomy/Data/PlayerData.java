@@ -67,7 +67,7 @@ public class PlayerData {
     }
     public boolean save() {
         String sql = "UPDATE economy SET balance = ?, bankBalance = ?, debt = ?, tokens = ?, lastLogin = ? WHERE uuid = ?";
-        try (Connection conn = plugin.getDatabase().connect();
+        try (Connection conn = plugin.getDatabase().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, getBalance());
             stmt.setDouble(2, getBankBalance());
