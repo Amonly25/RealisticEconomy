@@ -1,9 +1,9 @@
 main: com.ar.askgaming.realisticeconomy.RealisticEconomy
 name: RealisticEconomy
 api-version: 1.21
-version: 1.2
+version: 1.3
 author: AMONLY
-soft-depend: [Vault]
+softdepend: [Vault, PlaceholderAPI]
 commands:
   eco:
     description: Main command for RealisticEconomy

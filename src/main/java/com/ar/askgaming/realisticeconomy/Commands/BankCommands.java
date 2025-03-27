@@ -140,7 +140,7 @@ public class BankCommands implements TabExecutor{
 
         }
 
-        if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), amount)) {
+        if (plugin.getServerBank().transferWithPlayer(p.getUniqueId(), amount, true)) {
             pd.setDebt(pd.getDebt() + amount);
             pd.save();
             plugin.getEconomyLogger().log("Player " + p.getName() + " took a loan of " + amount);
@@ -157,7 +157,7 @@ public class BankCommands implements TabExecutor{
             p.sendMessage(getLang("error.invalid_amount", p));
             return;
         }
-        if (plugin.getServerBank().depositFromPlayerToServer(p.getUniqueId(), amount)) {
+        if (plugin.getServerBank().transferWithPlayer(p.getUniqueId(), amount, false)) {
             pd.setDebt(pd.getDebt() - amount);
             plugin.getEconomyLogger().log("Player " + p.getName() + " paid " + amount + " of debt");
             p.sendMessage(getLang("bank.pay_debt", p).replace("{amount}", String.valueOf(amount)));

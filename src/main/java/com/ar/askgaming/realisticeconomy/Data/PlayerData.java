@@ -9,7 +9,7 @@ import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class PlayerData {
 
-    private RealisticEconomy plugin = RealisticEconomy.getPlugin(RealisticEconomy.class);
+    private RealisticEconomy plugin = RealisticEconomy.getInstance();
 
     private double balance;
     private double bankBalance;

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.NotNull;
 
 import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 import com.ar.askgaming.realisticeconomy.Data.DatabaseManager;
@@ -38,112 +39,78 @@ public class BankTransactions {
     
         return 0.0; // Devolver 0.0 si no se encuentra un balance o hay un error
     }
-    //#region withdrawFromServerToPlayer
-    public boolean withdrawFromServerToPlayer(UUID playerUUID, double amount) {
+    //#region transfer
+    /**
+     * Transfers money between the server and a player.
+     *
+     * @param playerUUID The UUID of the player involved in the transaction.
+     * @param amount The amount of money to transfer (must be positive).
+     * @param serverPays If true, the server gives money to the player. If false, the server receives money from the player.
+     * @return true if the transaction was successful, false otherwise.
+     */
+    public boolean transferWithPlayer(@NotNull UUID playerUUID, double amount, boolean serverPays) {
         if (amount < 0) {
-            return false;
-        }
-    
-        double serverBalance = getBalance();
-        if (serverBalance < amount) {
-            return false;
-        }
-    
-        PlayerData playerData = plugin.getDatabase().loadPlayerData(playerUUID);
-        if (playerData == null) {
-            return false;
-        }
-        
-        playerData.setBalance(playerData.getBalance() + amount);
-        boolean step = playerData.save();
-        if (!step) {
-            playerData.setBalance(playerData.getBalance() - amount);
             return false;
         }
 
-        try (Connection conn = database.getConnection()) {
-            conn.setAutoCommit(false); // Iniciar la transacción
-    
-            // Actualizar el balance del banco del servidor
-            if (!saveServerBankBalance(serverBalance - amount, serverBalance, conn)) {
-                return false;
-            }
-            OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerUUID);
-            plugin.getEconomyLogger().log("Withdrawn " + amount + " from server bank to " + player.getName());
-            conn.commit(); // Confirmar la transacción
-            return true;
-    
-        } catch (SQLException e) {
-            playerData.setBalance(playerData.getBalance() - amount);
-            playerData.save();
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    //#region depositFromPlayerToServer
-    public boolean depositFromPlayerToServer(UUID playerUUID, double amount) {
-        if (amount < 0) {
-            return false;
-        }
-    
         PlayerData playerData = plugin.getDatabase().loadPlayerData(playerUUID);
         if (playerData == null) {
             return false;
         }
-    
+
         double playerBalance = playerData.getBalance();
-        if (playerBalance < amount) {
-            return false;
+        double serverBalance = getBalance();
+
+        if (serverPays) {
+            if (serverBalance < amount) {
+                return false; // The server bank does not have enough money
+            }
+            playerData.setBalance(playerBalance + amount);
+        } else {
+            if (playerBalance < amount) {
+                return false; // The player does not have enough money
+            }
+            playerData.setBalance(playerBalance - amount);
         }
-    
-        playerData.setBalance(playerBalance - amount);
+
         boolean step = playerData.save();
         if (!step) {
-            playerData.setBalance(playerBalance + amount);
+            // Revert changes if the player update fails
+            playerData.setBalance(serverPays ? playerBalance - amount : playerBalance + amount);
             return false;
         }
-        
-        try (Connection conn = database.getConnection()) {
-            conn.setAutoCommit(false); // Iniciar la transacción
-        
-            // Actualizar el balance del banco del servidor
-            if (!saveServerBankBalance(getBalance() + amount, getBalance(), conn)) {
-                return false;
-            }
-            OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerUUID);
-            plugin.getEconomyLogger().log("Deposited " + amount + " from " + player.getName() + " to server bank");
-            conn.commit(); // Confirmar la transacción
-            return true;
-    
-        } catch (SQLException e) {
-            playerData.setBalance(playerBalance + amount);
+
+        // Update the server bank balance
+        double newServerBalance = serverPays ? serverBalance - amount : serverBalance + amount;
+        if (!saveServerBankBalance(newServerBalance)) {
+            // Revert if the bank update fails
+            playerData.setBalance(serverPays ? playerBalance - amount : playerBalance + amount);
             playerData.save();
-            e.printStackTrace();
             return false;
         }
+
+        OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerUUID);
+        String action = serverPays ? "Withdrawn" : "Deposited";
+        plugin.getEconomyLogger().log(action + " " + amount + " " + (serverPays ? "to" : "from") + " " + player.getName());
+
+        return true;
     }
+
+    //#region set
     public boolean setServerBankBalance(double newBalance) {
-        try (Connection conn = database.getConnection()) {
-            return saveServerBankBalance(newBalance, getBalance(), conn);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            plugin.getEconomyLogger().log("Error setting server bank balance: " + e.getMessage());
-            return false;
-        }
+        return saveServerBankBalance(newBalance);
     }
-    
-    private boolean saveServerBankBalance(double newBalance, double oldBalance, Connection conn) throws SQLException {
-        String sql = "UPDATE serverbank SET balance = ? WHERE balance = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDouble(1, newBalance);
-            stmt.setDouble(2, oldBalance);
+
+    //#region save
+    private boolean saveServerBankBalance(double amount) {
+        String sql = "UPDATE serverbank SET balance = balance + ?"; // ← Corrección aquí
+        try (Connection conn = database.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, amount);
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
         } catch (SQLException e) {
             plugin.getEconomyLogger().log("Error updating server bank balance: " + e.getMessage());
-            conn.rollback();
-            throw e;
+            return false;
         }
     }
 }

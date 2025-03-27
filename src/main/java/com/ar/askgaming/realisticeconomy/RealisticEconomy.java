@@ -20,8 +20,8 @@ import com.ar.askgaming.realisticeconomy.Economy.TokenShop;
 import com.ar.askgaming.realisticeconomy.Listeners.InventoryClickListener;
 import com.ar.askgaming.realisticeconomy.Listeners.PlayerJoinListener;
 import com.ar.askgaming.realisticeconomy.Lottery.Lottery;
-import com.ar.askgaming.realisticeconomy.Lottery.LotteryCommands;
 import com.ar.askgaming.realisticeconomy.Lottery.LotteryManager;
+import com.ar.askgaming.realisticeconomy.Utilities.PlaceHolders;
 import com.ar.askgaming.realisticeconomy.Utilities.TimeManager;
 import com.ar.askgaming.realisticeconomy.Utilities.UtilityMethods;
 import com.ar.askgaming.realisticeconomy.Utilities.VaultHook;
@@ -30,7 +30,7 @@ import net.milkbowl.vault.economy.Economy;
 
 public class RealisticEconomy extends JavaPlugin{
 
-    private String serverLang;
+    private static RealisticEconomy instance;
 
     private EconomyService economyService;
     private BankTransactions serverBank;
@@ -45,7 +45,8 @@ public class RealisticEconomy extends JavaPlugin{
     private TokenShop tokenShop;
 
     public void onEnable(){
-        
+        instance = this;
+
         saveDefaultConfig();
 
         database = new DatabaseManager(this);
@@ -58,8 +59,9 @@ public class RealisticEconomy extends JavaPlugin{
             database.createServerBankTable();
         } catch (SQLException e) {
             getLogger().severe("Failed to connect to the database. Disabling plugin...");
+            getLogger().severe("Error: " + e.getMessage());
             getServer().getPluginManager().disablePlugin(this);
-            e.printStackTrace();
+            return;
         }
         
         langHandler = new LangManager(this);
@@ -71,26 +73,27 @@ public class RealisticEconomy extends JavaPlugin{
         lotteryManager = new LotteryManager(this);
         timeManager = new TimeManager(this);
 
-        serverLang = getConfig().getString("server_lang", "en");
         economyLogger = new EconomyLogger(this);
         utilityMethods = new UtilityMethods(this);
         tokenShop = new TokenShop(this);
         
         getServer().getServicesManager().register(EconomyService.class, economyService, this, ServicePriority.Highest);
 
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-
         getServer().getPluginCommand("eco").setExecutor(new EcoCommands(this));
         getServer().getPluginCommand("bank").setExecutor(new BankCommands(this));
-        getServer().getPluginCommand("lottery").setExecutor(new LotteryCommands(this));
         getServer().getPluginCommand("tokens").setExecutor(new TokenCommands(this));
 
-        new InventoryClickListener(this);
+        new InventoryClickListener();
+        new PlayerJoinListener();
 
         if (setupVault()) {
             getLogger().info("Hooked into Vault!");
         } else {
             getLogger().severe("Vault not found!");
+        }
+
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceHolders();
         }
     }
 
@@ -121,8 +124,8 @@ public class RealisticEconomy extends JavaPlugin{
     public LangManager getLang() {
         return langHandler;
     }
-    public String getServerLang() {
-        return serverLang;
+    public static RealisticEconomy getInstance() {
+        return instance;
     }
     public EconomyLogger getEconomyLogger() {
         return economyLogger;

@@ -21,9 +21,11 @@ import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class LotteryManager extends BukkitRunnable {
     
-    private RealisticEconomy plugin;
-    private File loteryFile;
+    private final RealisticEconomy plugin;
+    private final File loteryFile;
     private FileConfiguration loteryConfig;
+
+    private HashMap<String, Lottery> loteryList = new HashMap<>();
 
     public LotteryManager(RealisticEconomy main) {
         plugin = main;
@@ -31,6 +33,12 @@ public class LotteryManager extends BukkitRunnable {
         runTaskTimer(plugin, 0, 20*60);
 
         loteryFile = new File(plugin.getDataFolder(), "lottery.yml");
+        new LotteryCommands();
+
+        load();
+    }
+    //#region Load
+    public void load(){
         if (!loteryFile.exists()) {
             plugin.saveResource("lottery.yml", false);
         }
@@ -49,15 +57,22 @@ public class LotteryManager extends BukkitRunnable {
             }
         }
     }
+
+    private void saveConfig() {
+        try {
+            loteryConfig.save(loteryFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private String getLang(String path, Player p){
         return plugin.getLang().getFrom(path, p);
     }
 
-    private HashMap<String, Lottery> loteryList = new HashMap<>();
-
     public HashMap<String, Lottery> getLoteryList() {
         return loteryList;
     }
+    //#region Create
     public void createLotery(String name, int ticketPrice) {
 
         int maxNumbers = plugin.getConfig().getInt("lottery.max_numbers",50);
@@ -74,6 +89,7 @@ public class LotteryManager extends BukkitRunnable {
         }
           
     }
+    //#region Draw
     public void drawLotery(String name) {
         Lottery lotery = loteryList.get(name);
         if (lotery == null || !lotery.isActive()) return;
@@ -85,6 +101,8 @@ public class LotteryManager extends BukkitRunnable {
         List<UUID> winners = getWinners(lotery);
         boolean hasWinners = !winners.isEmpty();
         double prize = hasWinners ? lotery.getJackpot() / winners.size() : 0;
+
+        Bukkit.getPluginManager().callEvent(new LotteryDrawEvent(winningNumber, winners, prize, lotery.getJackpot()));
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(getLang("lottery.drawn", p).replace("{name}", name));
@@ -99,13 +117,14 @@ public class LotteryManager extends BukkitRunnable {
         } else {
         
             for (Player p : Bukkit.getOnlinePlayers()) {
-                p.sendMessage(getLang("lottery.jackpor", p).replace("{amount}", String.valueOf(lotery.getJackpot())));
+                p.sendMessage(getLang("lottery.jackpot", p).replace("{amount}", String.valueOf(lotery.getJackpot())));
                 p.sendMessage(getLang("lottery.no_winners", p));
             }
         }
         lotery.reset();
         saveConfig();
     }
+    //#region getWinners
     private List<UUID> getWinners(Lottery lotery){
         List<UUID> winners = new ArrayList<>();
 
@@ -124,13 +143,23 @@ public class LotteryManager extends BukkitRunnable {
         });
         return winners;
     }
-    // Process the winners and distribute the prize
+    //#region processWinners
     private void processWinners(String name, double prize, List<UUID> winners) {
+        List<String> winnersNames = new ArrayList<>();
+
         for (UUID winner : winners) {
             OfflinePlayer player = Bukkit.getOfflinePlayer(winner);
-            plugin.getEconomyService().depositPlayer(winner, prize);
+            winnersNames.add(player.getName());
+
+            boolean succes = plugin.getEconomyService().depositPlayer(winner, prize);
+            if (!succes) {
+                plugin.getLogger().severe("Error depositing prize to " + player.getName());
+                plugin.getEconomyLogger().log("Error depositing prize to " + player.getName() + " in lottery " + name + " amount: " + prize);
+                continue;
+            }
+
             double taxes = prize * 0.1;
-            plugin.getServerBank().depositFromPlayerToServer(winner, taxes);
+            plugin.getServerBank().transferWithPlayer(winner, taxes, true);
 
             //Verificar la transacción
 
@@ -142,11 +171,6 @@ public class LotteryManager extends BukkitRunnable {
 
                 }
             }
-        }
-        List<String> winnersNames = new ArrayList<>();
-        for (UUID winner : winners) {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(winner);
-            winnersNames.add(player.getName());
         }
         
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -197,7 +221,7 @@ public class LotteryManager extends BukkitRunnable {
         p.sendMessage(getLang("lottery.info.active", p).replace("{active}", String.valueOf(lotery.isActive())));
 
     }
-    // Delete a lottery
+    //#region Delete
     public void deleteLotery(String name) {
         if (loteryList.containsKey(name)) {
             loteryList.remove(name);
@@ -210,7 +234,7 @@ public class LotteryManager extends BukkitRunnable {
         }
     }
 
-    // Reset a lottery
+    //#region Reset
     public void resetLotery(String name) {
         Lottery lotery = loteryList.get(name);
         if (lotery != null) {
@@ -223,20 +247,12 @@ public class LotteryManager extends BukkitRunnable {
         }
     }
 
-    // Save the lottery configuration file
-    private void saveConfig() {
-        try {
-            loteryConfig.save(loteryFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     @Override
     public void run() {
         checkTimeForScheduler();
 
     }
-
+    //#region Scheduler
     private void checkTimeForScheduler() {
 
         ConfigurationSection scheduler = plugin.getConfig().getConfigurationSection("lottery.draw_scheduler");

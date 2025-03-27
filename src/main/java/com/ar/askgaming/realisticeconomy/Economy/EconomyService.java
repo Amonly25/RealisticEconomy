@@ -9,7 +9,7 @@ import com.ar.askgaming.realisticeconomy.Data.PlayerData;
 
 public class EconomyService {
 
-    private RealisticEconomy plugin;
+    private final RealisticEconomy plugin;
 
     public EconomyService(RealisticEconomy main) {
         plugin = main;

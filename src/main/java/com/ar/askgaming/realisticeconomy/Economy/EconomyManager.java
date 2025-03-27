@@ -30,6 +30,10 @@ public class EconomyManager {
 
     public EconomyManager(RealisticEconomy plugin) {
         this.plugin = plugin;
+        
+        loadEconomyData();
+    }
+    public void loadEconomyData() {
         this.inicialBalance = plugin.getConfig().getDouble("initial_server_bank_balance", 1000000000.0);
         this.inflation = 0.0;
         this.debtLimit = plugin.getConfig().getDouble("debt_limit", 10000.0);
@@ -39,6 +43,7 @@ public class EconomyManager {
 
         calculateInflation();
     }
+
     public void calculateInflation() {
         double inflation = 0.0;
         double serverBalance = plugin.getServerBank().getBalance();

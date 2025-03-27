@@ -8,7 +8,7 @@ import com.ar.askgaming.realisticeconomy.Economy.EconomyManager;
 
 public class TimeManager {
     
-    private RealisticEconomy plugin;
+    private final RealisticEconomy plugin;
 
     public TimeManager(RealisticEconomy main) {
         plugin = main;
@@ -49,7 +49,7 @@ public class TimeManager {
             
             // Transferir el interés al jugador
             if (deposit > 0) {
-                if (plugin.getServerBank().withdrawFromServerToPlayer(p.getUniqueId(), deposit)) {
+                if (plugin.getServerBank().transferWithPlayer(p.getUniqueId(), deposit, true)) {
                     p.sendMessage(getLang("bank.interest", p).replace("{amount}", String.valueOf(deposit)));
                     plugin.getEconomyLogger().log("Interest of " + deposit + " has been paid to " + p.getName());
                 } else {

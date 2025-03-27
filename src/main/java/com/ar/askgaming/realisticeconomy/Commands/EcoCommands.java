@@ -118,6 +118,8 @@ public class EcoCommands implements TabExecutor{
             case "reload":
                 if (p.hasPermission("eco.admin")){
                     plugin.reloadConfig();
+                    plugin.getLang().load();
+                    plugin.getEconomyManager().loadEconomyData();
                     p.sendMessage(getLang("commands.reload", p));
                 } else {
                     p.sendMessage(getLang("commands.no_perm", p));
@@ -242,12 +244,7 @@ public class EcoCommands implements TabExecutor{
         double amount = round(Double.valueOf(args[2]));
         OfflinePlayer target = checkPlayer(sender, args[1]);
     
-        boolean transactionSuccess;
-        if (isAdd) {
-            transactionSuccess = plugin.getServerBank().withdrawFromServerToPlayer(target.getUniqueId(), amount);
-        } else {
-            transactionSuccess = plugin.getServerBank().depositFromPlayerToServer(target.getUniqueId(), amount);
-        }
+        boolean transactionSuccess = plugin.getServerBank().transferWithPlayer(target.getUniqueId(), amount, isAdd);
     
         if (transactionSuccess) {
             String action = isAdd ? "added" : "took";

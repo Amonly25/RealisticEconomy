@@ -21,7 +21,7 @@ playtime_minimum_for_loan: 6 #hours
 playtime_minimum_for_player_pay: 6 #hours
 
 lottery:
-  max_numbers: 50 #Players can choose a number between 1 and 50
+  max_numbers: 50 #Players can choose a number between 1 and 25
   jackpot: 100.0 #Initial jackpot for each lottery 
   taxes: 0.1 #10%
   draw_scheduler:
@@ -32,6 +32,14 @@ lottery:
 tokenshop:
   title: "Tokens Shop"
   
+# Only if UniversalNotifier is installed
+# This is usefull to send notificaions via telegram, discord or email
+# https://builtbybit.com/resources/universalnotifier-broadcast-alerts.62960/
+notifier:
+  lottery:
+    draw: "🎰 A Lottery draw has been made, the winning number was %number%."
+    winners: "🎉 The winners of the lottery are: %winners% with %prize% each."
+    no_winners: " There are no winners, the next jackpot will be %jackpot% 🤑"
 
 
 

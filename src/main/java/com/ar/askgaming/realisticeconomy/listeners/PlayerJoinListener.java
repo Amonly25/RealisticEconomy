@@ -9,10 +9,12 @@ import com.ar.askgaming.realisticeconomy.RealisticEconomy;
 
 public class PlayerJoinListener implements Listener{
 
-    private RealisticEconomy plugin;
+    private final RealisticEconomy plugin;
 
-    public PlayerJoinListener(RealisticEconomy main) {
-        plugin = main;
+    public PlayerJoinListener() {
+        plugin = RealisticEconomy.getInstance();
+        
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler

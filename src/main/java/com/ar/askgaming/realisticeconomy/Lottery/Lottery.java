@@ -11,11 +11,8 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 public class Lottery implements ConfigurationSerializable{
     
     private String name;
-    private double ticketPrice;
-    private int ticketsSold;
-    private int numberLimit;
-    private int winningNumber;
-    private double jackpot;
+    private double ticketPrice, jackpot;
+    private int ticketsSold, numberLimit, winningNumber;
 
     private HashMap<UUID, List<Integer>> tickets = new HashMap<>();
 
@@ -28,6 +25,63 @@ public class Lottery implements ConfigurationSerializable{
         this.ticketsSold = 0;
         this.isActive = true;
         this.jackpot = jackpot;
+    }
+
+    public Lottery(Map<String, Object> map){
+        this.name = (String) map.get("name");
+        this.ticketPrice = (double) map.get("ticketPrice");
+        this.ticketsSold = (int) map.get("ticketsSold");
+        this.numberLimit = (int) map.get("numberLimit");
+        this.winningNumber = (int) map.get("winningNumber");
+        this.jackpot = (double) map.get("jackpot");
+        this.isActive = (boolean) map.get("isActive");
+        if (map.get("tickets") instanceof HashMap) {
+            @SuppressWarnings("unchecked")
+            HashMap<String, List<Integer>> tickets = (HashMap<String, List<Integer>>) map.get("tickets");
+            for (String player : tickets.keySet()) {
+                this.tickets.put(UUID.fromString(player), tickets.get(player));
+            } 
+        }
+    }
+    //#region Add
+    public void addTicket(UUID player, int number) {
+        List<Integer> playerTickets = tickets.get(player);
+        if (playerTickets == null) {
+            playerTickets = new ArrayList<>();
+            tickets.put(player, playerTickets);
+        }
+        playerTickets.add(number);
+        tickets.put(player, playerTickets);
+
+        ticketsSold++;
+        jackpot += ticketPrice;
+    }
+
+    //#region Serialization
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("ticketPrice", ticketPrice);
+        map.put("ticketsSold", ticketsSold);
+        map.put("numberLimit", numberLimit);
+        map.put("winningNumber", winningNumber);
+        map.put("jackpot", jackpot);
+        map.put("isActive", isActive);
+        
+        HashMap<String, List<Integer>> tickets = new HashMap<>();
+        for (UUID player : this.tickets.keySet()) {
+            tickets.put(player.toString(), this.tickets.get(player));
+        }
+        map.put("tickets", tickets);
+        return map;
+    }
+    //#region Reset
+    public void reset(){
+        tickets.clear();
+        ticketsSold = 0;
+        winningNumber = 0;
+        isActive = true;
     }
 
     public String getName() {
@@ -85,62 +139,5 @@ public class Lottery implements ConfigurationSerializable{
 
     public void setJackpot(double jacjpot) {
         this.jackpot = jacjpot;
-    }
-    //#region add
-    public void addTicket(UUID player, int number) {
-        List<Integer> playerTickets = tickets.get(player);
-        if (playerTickets == null) {
-            playerTickets = new ArrayList<>();
-            tickets.put(player, playerTickets);
-        }
-        playerTickets.add(number);
-        tickets.put(player, playerTickets);
-
-        ticketsSold++;
-        jackpot += ticketPrice;
-    }
-    public Lottery(Map<String, Object> map){
-        this.name = (String) map.get("name");
-        this.ticketPrice = (double) map.get("ticketPrice");
-        this.ticketsSold = (int) map.get("ticketsSold");
-        this.numberLimit = (int) map.get("numberLimit");
-        this.winningNumber = (int) map.get("winningNumber");
-        this.jackpot = (double) map.get("jackpot");
-        this.isActive = (boolean) map.get("isActive");
-        if (map.get("tickets") instanceof HashMap) {
-            @SuppressWarnings("unchecked")
-            HashMap<String, List<Integer>> tickets = (HashMap<String, List<Integer>>) map.get("tickets");
-            for (String player : tickets.keySet()) {
-                this.tickets.put(UUID.fromString(player), tickets.get(player));
-            }
-            
-        }
-
-    }
-
-    //#region Serialization
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", name);
-        map.put("ticketPrice", ticketPrice);
-        map.put("ticketsSold", ticketsSold);
-        map.put("numberLimit", numberLimit);
-        map.put("winningNumber", winningNumber);
-        map.put("jackpot", jackpot);
-        map.put("isActive", isActive);
-        
-        HashMap<String, List<Integer>> tickets = new HashMap<>();
-        for (UUID player : this.tickets.keySet()) {
-            tickets.put(player.toString(), this.tickets.get(player));
-        }
-        map.put("tickets", tickets);
-        return map;
-    }
-    public void reset(){
-        tickets.clear();
-        ticketsSold = 0;
-        winningNumber = 0;
-        isActive = true;
     }
 }
