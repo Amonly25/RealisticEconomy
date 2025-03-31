@@ -1,17 +1,17 @@
-'0':
-  displayName: '&Item Example' #This will be showen on the menu
-  price: 1 # Token price if is 0 not will be purchasable
-  lore:
-  - "&7Price: &a1 token"
-  - "&eYou will obtain something special"
-  commands: # Add commands
-  - eco add {player} 100
-  - lp user {player} parent addtemp example_group 1d
-  message: 'Congratulations, you bought something!' #Sended to the buyer
-  broadcast: '{player} have bought some especial from the token shop!' #Message will broadcasted
-  giveItem: false # give the item described below
-  item: # DONT MODIFY THIS IF YOU DONT KNOW WHAT ARE YOU DOING
-    # If you want custom name o lore on the item, change it before add it to the shop using some rename plugin 
-    ==: org.bukkit.inventory.ItemStack
-    v: 4189
-    type: DIAMOND
+# '0':
+#   displayName: '&Item Example' #This will be showen on the menu
+#   price: 1 # Token price if is 0 not will be purchasable
+#   lore:
+#   - "&7Price: &a1 token"
+#   - "&eYou will obtain something special"
+#   commands: # Add commands
+#   - eco add {player} 100
+#   - lp user {player} parent addtemp example_group 1d
+#   message: 'Congratulations, you bought something!' #Sended to the buyer
+#   broadcast: '{player} have bought some especial from the token shop!' #Message will broadcasted
+#   giveItem: false # give the item described below
+#   item: # DONT MODIFY THIS IF YOU DONT KNOW WHAT ARE YOU DOING
+#     # If you want custom name o lore on the item, change it before add it to the shop using some rename plugin 
+#     ==: org.bukkit.inventory.ItemStack
+#     v: 4189
+#     type: DIAMOND
